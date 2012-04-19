@@ -8,6 +8,7 @@ class TimeWheelTestCases {
   void testAddandDelete();
   void testAddandDelete2();
   void testIllegalDelete();
+  void testTicks();
 };
 
 #endif

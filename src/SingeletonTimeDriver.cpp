@@ -16,7 +16,6 @@ namespace NDSL {
 void sigalrmhandler(int signum) {
   //for each timer driver, tick ++ 
   SingeletonTimeDriver* driver = SingeletonTimeDriver::getInstance();
-  printf_elapsed_time();
   driver->tick();      
 }
 

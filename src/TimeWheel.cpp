@@ -1,6 +1,9 @@
 #include "TimeWheel.hpp"
 
 #include <cassert>
+#include <vector>
+#include "TimeHelper.hpp"
+
 namespace {
    //this is a helper class to help auto delete the array.
    template <typename T>
@@ -15,11 +18,12 @@ namespace NDSL {
 
 TimeWheel::TimeWheel(long granularity, int wheelSize) 
     : spokewheel_(new Spoke[wheelSize],
-                  my_array_deleter<Spoke>()),
+                  ::my_array_deleter<Spoke>()),
       granularity_(granularity) ,
-      currentIndex_(wheelSize-1) ,
+      currentIndex_(0) ,
       wheelSize_(wheelSize){
-
+  assert(granularity_ != 0);
+  assert(wheelSize_ != 0);
 }
 
 TimeWheel::~TimeWheel() {
@@ -29,26 +33,26 @@ TimeWheel::~TimeWheel() {
 int TimeWheel::totalTimers() const {
   Spoke*  spokes = spokewheel_.get();
   int nc = 0;
-  for(int i = 0;i <  wheelSize_ ; i++)
+  for(int i = 0;i <  wheelSize_ ; i++) {
     nc += spokes[i].size();
+  }
   return nc;
 }
-TimeWheel::TimerId TimeWheel::addTimer(std::tr1::shared_ptr<Timer> timer) {
+void TimeWheel::addTimer(std::tr1::shared_ptr<Timer> timer) {
                           
   assert(currentIndex_ < wheelSize_);
 
   Spoke*  spokes = spokewheel_.get();
   int nc = timer->getInterval() / granularity_;
+  if (nc == 0)
+    nc++;
   int rotationtimes = nc / wheelSize_;
-  int lest = nc % wheelSize_ ;
-  if (lest == 0)
-    lest++;
 
   DataType data = DataType(rotationtimes, timer);
-  int offset = (currentIndex_ + lest) % wheelSize_;
+  int offset = (currentIndex_ + nc) % wheelSize_;
 
   spokes[offset].push_front(data);
-  return TimerId(offset, spokes[offset].begin());
+  timer->setTimerId(TimerId(offset, spokes[offset].begin()));
 }
 
 int TimeWheel::stopTimer(TimeWheel::TimerId timerid){
@@ -72,26 +76,31 @@ int TimeWheel::perTickBookKeeping() {
   currentIndex_ %= wheelSize_;
 
   Spoke*  spokes = spokewheel_.get();
-  Spoke list =  spokes[currentIndex_];
+  Spoke& list =  spokes[currentIndex_];
   
+
+  int old_size = list.size();
+  int ndeleted = 0;
+
+  std::vector<std::tr1::shared_ptr<Timer> > newtimers;
   for(Spoke::iterator iter = list.begin();
       iter != list.end();
       ) {
     if (iter->first == 0) {
-      //call back 
+      //dispatch the BaseJob 
       expiryProcessing(iter->second);
 
       if (iter->second->needRestart()) {
         std::tr1::shared_ptr<Timer> newTimer(
             new Timer(iter->second->getJob(),
-                iter->second->getInterval(),
+            iter->second->getInterval(),
             true));
         iter = list.erase(iter);
-        addTimer(newTimer);
+        newtimers.push_back(newTimer); 
       } else {
         iter = list.erase(iter);
+        ndeleted ++;
       }
-      
 
     } else {
       assert(iter->first > 0);
@@ -99,8 +108,22 @@ int TimeWheel::perTickBookKeeping() {
       iter++;
     }
   }
-  return 0;
+  //restart the repeated timer
+  for (size_t i = 0; i < newtimers.size(); i++) {
+    addTimer(newtimers[i]);
+  }
+
+  assert(list.size() == (unsigned int)(old_size - ndeleted));
+
+  return ndeleted;
 }
+
+int TimeWheel::stopTimer(std::tr1::shared_ptr<Timer> timer) {
+  int status = stopTimer(timer->getTimerId());
+  timer->resetTimerId();
+  return  status;
+}
+
                       
 
 }

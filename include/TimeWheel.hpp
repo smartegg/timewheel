@@ -8,22 +8,24 @@
 namespace NDSL {
 
 
+class Timer;
+
 class TimeWheel {
    //rotationtimes with Time*
    typedef std::pair<int, std::tr1::shared_ptr<Timer> > DataType;
-  public:
    typedef std::pair<int, std::list<DataType>::iterator> TimerId;
+  public:
    //the granulary is in milliseconds.
    TimeWheel(long granulary = 100, int wheelSize = 256 * 4);
    virtual ~TimeWheel();
 
    //register  a  timer
-   TimerId addTimer(std::tr1::shared_ptr<Timer> timer);
+   void addTimer(std::tr1::shared_ptr<Timer> timer);
    //stop a running timer
-   int stopTimer(TimerId id);
-   //
+   int stopTimer(std::tr1::shared_ptr<Timer> timer);
+   
    int expiryProcessing(std::tr1::shared_ptr<Timer> timer) const;
-   //invoked in every  @granulary millisecnods.  
+   //invoked in every  @granulary millisecnods.  should not called by user.
    int perTickBookKeeping();
    int totalTimers() const;   
    size_t getGranularity() const {
@@ -31,6 +33,8 @@ class TimeWheel {
    }
 
   private:
+   int stopTimer(TimerId id);
+
    typedef std::list<DataType> Spoke;
    typedef std::tr1::shared_ptr<Spoke> SpokeWheelPtr;
 

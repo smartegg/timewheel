@@ -1,5 +1,7 @@
 #include "TimeDriver.hpp"
 
+#include "TimeHelper.hpp"
+
 namespace NDSL {
 
 TimeDriver::TimeDriver(long granularity)
@@ -22,6 +24,9 @@ int TimeDriver::tick() {
     if (ntimes == 0)
       ntimes++;
     if (ticks_  % ntimes  == 0) {
+#ifdef TIME_DRIVER_STATUS
+      puts("timedriver tick");
+#endif
       wheels_[i]->perTickBookKeeping();
     }
   }

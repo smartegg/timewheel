@@ -50,12 +50,12 @@ int TimeDriverByTimeFd::start() {
       handle_error(false);
     totalexpired += expired;
     printf_elapsed_time();
-#ifdef DEBUG
-    printf("read: %llu; total=%llu\n",
+#ifdef TIME_DRIVER_STATUS
+    printf("expired: %llu; total expired=%llu\n",
                 (unsigned long long) expired,
                 (unsigned long long) totalexpired);
 #endif
-    for (uint64_t i = 0; i < s; i++)
+    for (uint64_t i = 0; i < expired; i++)
        tick();      
   }
   
