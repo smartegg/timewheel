@@ -47,7 +47,7 @@ void TimeWheel::addTimer(std::tr1::shared_ptr<Timer> timer) {
   int nc = timer->getInterval() / granularity_;
   if (nc == 0)
     nc++;
-  int rotationtimes = nc / wheelSize_;
+  int rotationtimes = (nc + wheelSize_ - 1)/ wheelSize_;//just get the ceilling value , not floor value.
 
   DataType data = DataType(rotationtimes, timer);
   int offset = (currentIndex_ + nc) % wheelSize_;
@@ -95,11 +95,11 @@ int TimeWheel::perTickBookKeeping() {
   for (Spoke::iterator iter = list.begin();
        iter != list.end();
        iter++) {
-    if (iter->first == 0) {
+    if (iter->first == 1) {
         deleted_later.push_back(iter->second);
         iterators.push_back(iter);
     } else {
-      assert(iter->first > 0);
+      assert(iter->first > 1);
       iter->first--;
     }
   }

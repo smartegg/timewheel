@@ -13,7 +13,6 @@ namespace {
 class Job : public BaseJob {
  public :
   int run(Timer* ) {
-    puts("hello");
     return 0;
   }
 };
@@ -154,7 +153,6 @@ void TimeWheelTestCases::testAddRemoveInBaseJob() {
   wheel->addTimer(timer1);
 
   //simulate
-  puts("simulate");
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
   wheel->perTickBookKeeping();//100
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create two
@@ -168,11 +166,9 @@ void TimeWheelTestCases::testAddRemoveInBaseJob() {
   wheel->perTickBookKeeping();//500
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
   wheel->perTickBookKeeping();//600
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired 
-  wheel->perTickBookKeeping();//700
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired 
-  for (;;) {
-    wheel->perTickBookKeeping();//700
-    BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
-  }
+  wheel->perTickBookKeeping();//700
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired 
+  wheel->perTickBookKeeping();//800
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
 }
