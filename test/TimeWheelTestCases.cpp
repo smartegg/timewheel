@@ -6,7 +6,7 @@
 #include "TimerUtil.hpp"
 
 using namespace NDSL;
-using namespace std;;
+using namespace std;
 
 
 void TimeWheelTestCases::testDefaultCtor() {
