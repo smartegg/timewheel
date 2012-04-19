@@ -79,7 +79,6 @@ int TimeWheel::perTickBookKeeping() {
   Spoke& list =  spokes[currentIndex_];
   
 
-  int old_size = list.size();
   int ndeleted = 0;
 
   std::vector<std::tr1::shared_ptr<Timer> > newtimers;
@@ -113,7 +112,6 @@ int TimeWheel::perTickBookKeeping() {
     addTimer(newtimers[i]);
   }
 
-  assert(list.size() == (unsigned int)(old_size - ndeleted));
 
   return ndeleted;
 }
