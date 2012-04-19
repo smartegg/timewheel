@@ -29,6 +29,7 @@ class Job2 : public BaseJob {
 
 
 int main() {
+
   using namespace std::tr1;
   TimeDriver* timedriver = SingeletonTimeDriver::getInstance();
   shared_ptr<TimeWheel> timewheel(new TimeWheel());
@@ -46,7 +47,9 @@ int main() {
   timewheel->addTimer(timer3);
 
   timedriver->mountTimeWheel(timewheel);
+//  timewheel->stopTimer(id2);
   timedriver->start();
+
 
   return 0;
 }

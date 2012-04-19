@@ -31,7 +31,7 @@ class Job2 : public BaseJob {
 int main() {
   using namespace std::tr1;
   shared_ptr<TimeDriver> timedriver(new TimeDriverByTimeFd());
-  shared_ptr<TimeWheel> timewheel(new TimeWheel());
+  shared_ptr<TimeWheel>  timewheel(new TimeWheel());
 
   shared_ptr<BaseJob> job1(new Job1());
   shared_ptr<BaseJob> job2(new Job2());

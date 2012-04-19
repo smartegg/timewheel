@@ -36,6 +36,7 @@ public:
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testAddandDelete2, instance_timewheel));
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testIllegalDelete, instance_timewheel)); 
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testTicks, instance_timewheel));
+    add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testAddRemoveInBaseJob, instance_timewheel));
 
 
     boost::shared_ptr<SingeletonTimeDriverTestCases> instance_singeleton(new SingeletonTimeDriverTestCases());

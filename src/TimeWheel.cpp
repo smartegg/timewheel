@@ -38,6 +38,7 @@ int TimeWheel::totalTimers() const {
   }
   return nc;
 }
+
 void TimeWheel::addTimer(std::tr1::shared_ptr<Timer> timer) {
                           
   assert(currentIndex_ < wheelSize_);
@@ -53,17 +54,20 @@ void TimeWheel::addTimer(std::tr1::shared_ptr<Timer> timer) {
 
   spokes[offset].push_front(data);
   timer->setTimerId(TimerId(offset, spokes[offset].begin()));
+  timer->setTimeWheel(this);
 }
+
 
 int TimeWheel::stopTimer(TimeWheel::TimerId timerid){
   int offset = timerid.first;
   Spoke::iterator iter = timerid.second;
   Spoke*  spokes = spokewheel_.get();
-  if (offset >=0 && offset < wheelSize_)
+  if (isLegal(timerid)) {
     spokes[offset].erase(iter);
+    return 0;
+  }
   else 
     return -1;
-  return 0; 
 }
 
 int TimeWheel::expiryProcessing(std::tr1::shared_ptr<Timer> timer) const {
@@ -71,6 +75,13 @@ int TimeWheel::expiryProcessing(std::tr1::shared_ptr<Timer> timer) const {
   return 0;
 }
 
+/**
+ * @brief
+ * becase the callback BaseJob can add/remove timer , which can cause the
+ * timewheel-datasture become a mess, we use a elegant algorithm to keep it
+ * clean.
+ * the algorithm should be curious about the data structure consistent.
+ */ 
 int TimeWheel::perTickBookKeeping() {
   currentIndex_++;
   currentIndex_ %= wheelSize_;
@@ -79,47 +90,67 @@ int TimeWheel::perTickBookKeeping() {
   Spoke& list =  spokes[currentIndex_];
   
 
-  int ndeleted = 0;
-
-  std::vector<std::tr1::shared_ptr<Timer> > newtimers;
-  for(Spoke::iterator iter = list.begin();
-      iter != list.end();
-      ) {
+  std::vector<std::tr1::shared_ptr<Timer> > deleted_later;//record the Time to be deleled
+  std::vector<Spoke::iterator> iterators; // which need to be deleted
+  for (Spoke::iterator iter = list.begin();
+       iter != list.end();
+       iter++) {
     if (iter->first == 0) {
-      //dispatch the BaseJob 
-      expiryProcessing(iter->second);
-
-      if (iter->second->needRestart()) {
-        std::tr1::shared_ptr<Timer> newTimer(
-            new Timer(iter->second->getJob(),
-            iter->second->getInterval(),
-            true));
-        iter = list.erase(iter);
-        newtimers.push_back(newTimer); 
-      } else {
-        iter = list.erase(iter);
-        ndeleted ++;
-      }
-
+        deleted_later.push_back(iter->second);
+        iterators.push_back(iter);
     } else {
       assert(iter->first > 0);
       iter->first--;
-      iter++;
     }
   }
-  //restart the repeated timer
+
+  for (size_t i = 0; i < deleted_later.size(); i++) {
+    expiryProcessing(deleted_later[i]);//this may change the timewheel inner structure, iter maybe invalid (caused by add/remove)
+  }
+
+  std::vector<std::tr1::shared_ptr<Timer> > newtimers; //record the repeated timer to be inserted again.
+  for (size_t i = 0; i < deleted_later.size(); i++) {
+    if(!isLegal(deleted_later[i]->getTimerId()))
+      continue;
+    if (deleted_later[i]->needRestart()) {
+      std::tr1::shared_ptr<Timer> newTimer(
+                new Timer(deleted_later[i]->getJob(),
+                deleted_later[i]->getInterval(),
+                true));
+    
+      newtimers.push_back(newTimer);
+    } 
+    list.erase(iterators[i]);
+  }
+
   for (size_t i = 0; i < newtimers.size(); i++) {
     addTimer(newtimers[i]);
   }
 
 
-  return ndeleted;
+  return 0;
 }
 
 int TimeWheel::stopTimer(std::tr1::shared_ptr<Timer> timer) {
   int status = stopTimer(timer->getTimerId());
+  //just make the repeated timer failed 
+  timer->setRestart(false);
   timer->resetTimerId();
+  timer->setTimeWheel(0);
   return  status;
+}
+
+int TimeWheel::stopTimer(Timer*  timer) {
+  int status = stopTimer(timer->getTimerId());
+  //just make the repeated timer failed 
+  timer->setRestart(false);
+  timer->resetTimerId();
+  timer->setTimeWheel(0);
+  return  status;
+}
+
+bool TimeWheel::isLegal(TimeWheel::TimerId id) const {
+  return id.first >= 0 && id.first < wheelSize_;
 }
 
                       

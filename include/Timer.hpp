@@ -18,8 +18,11 @@ class Timer {
   Timer(const std::tr1::shared_ptr<BaseJob> jobptr, size_t interval, bool needRestart) 
     :interval_(interval), 
      needRestart_(needRestart) ,
-     jobptr_(jobptr) {
+     jobptr_(jobptr),
+     wheel_(0) {
+
      resetTimerId();
+
   }
 
 
@@ -30,9 +33,20 @@ class Timer {
   void setInterval(size_t interval) {
     interval_ =  interval;
   }
+
+
+  TimeWheel* getTimeWheel() {
+    return wheel_;
+  }
+
   bool needRestart() const {
     return needRestart_;
   }
+
+  void setRestart(bool needRestart) {
+    needRestart_ = needRestart;
+  }
+
   const std::tr1::shared_ptr<BaseJob> getJob() const {
     return jobptr_;
   }
@@ -42,7 +56,10 @@ class Timer {
    typedef std::pair<int, std::list<DataType>::iterator> TimerId;
   
 
-  //this func is invoked only by TimeWheel
+  //these func is invoked only by TimeWheel
+  void setTimeWheel(TimeWheel* wheel) {
+    wheel_ = wheel;
+  }
 
   TimerId getTimerId() {
     return id_;
@@ -59,6 +76,7 @@ class Timer {
   size_t interval_;
   bool needRestart_;
   std::tr1::shared_ptr<BaseJob> jobptr_;
+  TimeWheel* wheel_;
 
   TimerId  id_;// this variable store the timeid returned by TimeWheeel, convenient for delele  this timer in constant time.
 

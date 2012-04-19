@@ -23,6 +23,8 @@ class TimeWheel {
    void addTimer(std::tr1::shared_ptr<Timer> timer);
    //stop a running timer
    int stopTimer(std::tr1::shared_ptr<Timer> timer);
+   //user has responssibility to delete timer's memory.
+   int stopTimer(Timer* timer);
    
    int expiryProcessing(std::tr1::shared_ptr<Timer> timer) const;
    //invoked in every  @granulary millisecnods.  should not called by user.
@@ -42,6 +44,8 @@ class TimeWheel {
    long granularity_;
    int currentIndex_;
    int wheelSize_;
+
+   bool isLegal(TimerId id) const;
   
    //forbid  copy semantic
    TimeWheel(const TimeWheel&);

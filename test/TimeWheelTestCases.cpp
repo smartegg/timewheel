@@ -13,10 +13,28 @@ namespace {
 class Job : public BaseJob {
  public :
   int run(Timer* ) {
-    puts("heelo");
+    puts("hello");
     return 0;
   }
 };
+
+class StopTimer : public BaseJob {
+ public :
+  int run(Timer* timer) {
+    using namespace std;
+    tr1::shared_ptr<BaseJob> job(new Job());          
+    //creat  one-shot 100ms, 500ms,600ms timers
+    tr1::shared_ptr<Timer> timer1(new Timer(job, 100,false));
+    tr1::shared_ptr<Timer> timer2(new Timer(job, 500,false));
+    tr1::shared_ptr<Timer> timer3(new Timer(job, 600,false));
+    timer->getTimeWheel()->addTimer(timer1);
+    timer->getTimeWheel()->addTimer(timer2);
+    timer->getTimeWheel()->addTimer(timer3);
+    timer->getTimeWheel()->stopTimer(timer);
+    return 0;
+  }
+};
+
 }
 
 
@@ -78,62 +96,83 @@ void TimeWheelTestCases::testTicks() {
   //creat a one-shot timer
   tr1::shared_ptr<Timer> timer3(new Timer(job, 800,false));
 
+  //creat a one-shot timer
+  tr1::shared_ptr<Timer> timer4(new Timer(job, 500,false));
+
   BOOST_CHECK(wheel->totalTimers() == 0);
   wheel->addTimer(timer1);
   wheel->addTimer(timer2);
   wheel->addTimer(timer3);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
+  wheel->addTimer(timer4);
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4);
 
 /*  tr1::shared_ptr<TimeDriver> driver(new TimeDriverBySelect);
   driver->mountTimeWheel(wheel);
   driver->start();   */
 
   //simulate just as if there is a time driver drive this wheel.
-  int ndeleted = 0;
-  ndeleted =  wheel->perTickBookKeeping();//100
-  BOOST_CHECK_EQUAL(ndeleted, 1);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
+  wheel->perTickBookKeeping();//100
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  ndeleted = wheel->perTickBookKeeping();//200
-  BOOST_CHECK_EQUAL(ndeleted, 0);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
+  wheel->perTickBookKeeping();//200
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  ndeleted = wheel->perTickBookKeeping();//300
-  BOOST_CHECK_EQUAL(ndeleted, 0);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
+  wheel->perTickBookKeeping();//300
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  ndeleted = wheel->perTickBookKeeping();//400
-  BOOST_CHECK_EQUAL(ndeleted, 0);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
+  wheel->perTickBookKeeping();//400
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  ndeleted = wheel->perTickBookKeeping();//500
-  BOOST_CHECK_EQUAL(ndeleted, 0);
+  wheel->perTickBookKeeping();//500
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
 
 
-  ndeleted = wheel->perTickBookKeeping();//600
-  BOOST_CHECK_EQUAL(ndeleted, 1);
+  wheel->perTickBookKeeping();//600
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
 
 
-  ndeleted = wheel->perTickBookKeeping();//700
-  BOOST_CHECK_EQUAL(ndeleted, 0);
+  wheel->perTickBookKeeping();//700
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
 
 
-  ndeleted = wheel->perTickBookKeeping();//800
-  BOOST_CHECK_EQUAL(ndeleted, 1);
+  wheel->perTickBookKeeping();//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 
-  ndeleted = wheel->perTickBookKeeping();//900
-  BOOST_CHECK_EQUAL(ndeleted, 0);
+  wheel->perTickBookKeeping();//900
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 
-
-  ndeleted = wheel->perTickBookKeeping();//1000
-  BOOST_CHECK_EQUAL(ndeleted, 0);
+  wheel->perTickBookKeeping();//1000
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); 
+}
 
+void TimeWheelTestCases::testAddRemoveInBaseJob() {
+  tr1::shared_ptr<TimeWheel> wheel(new  TimeWheel(100,5));
+  tr1::shared_ptr<BaseJob> job(new StopTimer());          
+  //creat a one-shot timer
+  tr1::shared_ptr<Timer> timer1(new Timer(job, 100,true));
 
+  wheel->addTimer(timer1);
 
+  //simulate
+  puts("simulate");
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  wheel->perTickBookKeeping();//100
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create two
+  
+  wheel->perTickBookKeeping();//200
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired one
+  wheel->perTickBookKeeping();//300
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  wheel->perTickBookKeeping();//400
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  wheel->perTickBookKeeping();//500
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  wheel->perTickBookKeeping();//600
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired 
+  wheel->perTickBookKeeping();//700
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired 
+  for (;;) {
+    wheel->perTickBookKeeping();//700
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
+  }
 }
