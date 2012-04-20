@@ -50,6 +50,7 @@ class Timer {
   const std::tr1::shared_ptr<BaseJob> getJob() const {
     return jobptr_;
   }
+ protected:
   virtual int expiryAction(void* ptr);
  private:
    typedef std::pair<int, std::tr1::shared_ptr<Timer> > DataType;
