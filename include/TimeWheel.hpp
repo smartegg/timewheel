@@ -4,13 +4,15 @@
 #include <boost/intrusive/list.hpp>
 
 namespace ndsl {
-
 class TimeWheel {
   public:
     class Timer {
       public:
-        Timer(int timespan) : timespan_(timespan) {}
-        boost::intrusive::list_member_hook<<link_mode<auto_unlink> > timeHook_;
+        explicit Timer(int timespan) : timespan_(timespan) {}
+        boost::intrusive::list_member_hook
+          <
+            boost::intrusive::link_mode<boost::intrusive::auto_unlink> 
+          > timeHook_;
 
         //MUST NOT free the timer's memory when callback()!
         virtual void callback() = 0;
@@ -18,6 +20,9 @@ class TimeWheel {
           return timespan_;
         }
 
+        bool isRegistered() const {
+          return timeHook_.is_linked();
+        }
         void stop() {
           if (timeHook_.is_linked())
             timeHook_.unlink();
@@ -25,12 +30,26 @@ class TimeWheel {
 
       private:
         int timespan_;
-        int rt_;//left rotation time
+        int rc_;//left rotation time
+        friend class TimeWheel;
     };
   private:
-    typedef boost::intrusive::list<Timer, boost::intrusive::list_member_hook<<link_mode<auto_unlink> >,&Timer::timeHook_> Spoke;
+    typedef boost::intrusive::list
+        <
+          Timer, 
+          boost::intrusive::member_hook
+          <
+            Timer,
+            boost::intrusive::list_member_hook
+            <
+                boost::intrusive::link_mode<boost::intrusive::auto_unlink> 
+            >,
+            &Timer::timeHook_
+          >,
+          boost::intrusive::constant_time_size<false> 
+      > Spoke;
   public:
-    TimeWheel(int frequence = 100, int wheelSize_ = 1024);
+    explicit TimeWheel(int frequence = 100, int wheelSize_ = 1024);
     virtual ~TimeWheel();
 
     void run(int milliseconds);
@@ -46,22 +65,16 @@ class TimeWheel {
     int tick();
 
     Spoke* wheel_;
-    int currentIndex_;
+    size_t currentIndex_;
     size_t wheelSize_;
     size_t frequence_;
-    size_t timers_;
-    
 };
 
-inline TimeWheel::totalTimers() {
-  return timers_;
-}
-
-inline TimeWheel::wheelSize() {
+inline size_t TimeWheel::wheelSize() const {
   return wheelSize_;
 }
 
-inline TimeWheel::getFrequence() {
+inline size_t TimeWheel::getFrequence() const {
   return frequence_;
 }
 
