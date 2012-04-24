@@ -10,10 +10,10 @@
 
 
 
-namespace NDSL{
+namespace ndsl {
 
 TimeDriverBySelect::TimeDriverBySelect(long granularity)
-    : TimeDriver(granularity) {
+  : TimeDriver(granularity) {
 
 }
 
@@ -26,23 +26,29 @@ int TimeDriverBySelect::start() {
 
 
   timeout.tv_sec = granularity_ / 1000;
-  timeout.tv_usec = (granularity_ % 1000) * 1000;//milli to micro 
+  timeout.tv_usec = (granularity_ % 1000) * 1000;//milli to micro
 
   printf_elapsed_time();
+
   for (;;) {
     int r = ::select(0, NULL, NULL, NULL, &timeout);
+
     if (r < 0) {
-      if (r == -1 && errno == EINTR)
+      if (r == -1 && errno == EINTR) {
         continue;
+      }
+
       handle_error(true);
     }
+
     printf_elapsed_time();
     tick();
-    
+
     //restart
     timeout.tv_sec = granularity_ / 1000;
-    timeout.tv_usec = (granularity_ % 1000) * 1000;//milli to micro 
+    timeout.tv_usec = (granularity_ % 1000) * 1000;//milli to micro
   }
+
   return 0;
 }
 

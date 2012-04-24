@@ -14,7 +14,7 @@
                                               (int)new_time.it_interval.tv_nsec);  \
 }
 
-namespace NDSL {
+namespace ndsl {
 
 
 TimeDriverByTimeFd::TimeDriverByTimeFd(long granularity) 

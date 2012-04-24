@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <iostream>
 
-namespace NDSL {
+namespace ndsl {
 
 extern void handleError(const char* filename,const char* funcname,
                         const int line,

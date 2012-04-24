@@ -7,7 +7,7 @@
 
 
 
-namespace NDSL {
+namespace ndsl {
 
 void handleError(const char* filename,
                         const char* funcname,
