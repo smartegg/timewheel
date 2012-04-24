@@ -47,10 +47,7 @@ AR = ar
 ARFLAGS = cru
 ___lib_libtimewheel_a_AR = $(AR) $(ARFLAGS)
 ___lib_libtimewheel_a_LIBADD =
-am____lib_libtimewheel_a_OBJECTS = SingeletonTimeDriver.$(OBJEXT) \
-	TimeDriverBySelect.$(OBJEXT) TimeDriverByTimeFd.$(OBJEXT) \
-	TimeDriver.$(OBJEXT) TimeHelper.$(OBJEXT) Timer.$(OBJEXT) \
-	TimeWheel.$(OBJEXT)
+am____lib_libtimewheel_a_OBJECTS = TimeWheel.$(OBJEXT)
 ___lib_libtimewheel_a_OBJECTS = $(am____lib_libtimewheel_a_OBJECTS)
 am__dirstamp = $(am__leading_dot)dirstamp
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -160,14 +157,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir)/include
 noinst_LIBRARIES = ../lib/libtimewheel.a
-___lib_libtimewheel_a_SOURCES = SingeletonTimeDriver.cpp \
-			 TimeDriverBySelect.cpp \
-			 TimeDriverByTimeFd.cpp\
-			TimeDriver.cpp \
-			TimeHelper.cpp \
-			Timer.cpp \
-			TimeWheel.cpp 
-
+___lib_libtimewheel_a_SOURCES = TimeWheel.cpp 
 all: all-am
 
 .SUFFIXES:
@@ -219,13 +209,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SingeletonTimeDriver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriver.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverBySelect.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverByTimeFd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeHelper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeWheel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Timer.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -437,9 +421,6 @@ uninstall-am:
 	mostlyclean-generic pdf pdf-am ps ps-am tags uninstall \
 	uninstall-am
 
-
-# NOTE: link against to local generated lib, MUST use LDADD
-#EXTRA_DIST = 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

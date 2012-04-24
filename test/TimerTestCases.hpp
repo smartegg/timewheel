@@ -3,10 +3,8 @@
 
 class TimerTestCases {
  public:
-  void testJobValue1();
-  void testJobValue2();
-  void testIntervalValue();
-  void testRestartValue();
+  void testTimeSpan();
+  void testInitialState();
 };
 
 #endif

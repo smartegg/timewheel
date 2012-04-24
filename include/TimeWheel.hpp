@@ -8,14 +8,22 @@ class TimeWheel {
   public:
     class Timer {
       public:
-        explicit Timer(int timespan) : timespan_(timespan) {}
+        explicit Timer(int timespan, bool needRepeat = false) 
+            : timespan_(timespan),
+              needRepeat_(needRepeat_) ,
+              wh_(0) {
+        }
+
+        virtual ~Timer() {}
+
         boost::intrusive::list_member_hook
-          <
+        <
             boost::intrusive::link_mode<boost::intrusive::auto_unlink> 
-          > timeHook_;
+        > timeHook_;
 
         //MUST NOT free the timer's memory when callback()!
-        virtual void callback() = 0;
+        virtual void callback()  = 0;
+
         int getTimeSpan()const {
           return timespan_;
         }
@@ -23,15 +31,32 @@ class TimeWheel {
         bool isRegistered() const {
           return timeHook_.is_linked();
         }
+
+        bool needRepeat() const {
+          return needRepeat_;
+        }
+
         void stop() {
           if (timeHook_.is_linked())
             timeHook_.unlink();
+          wh_ = 0;
+        }
+
+        TimeWheel* getTimeWheel() {
+          return wh_;
         }
 
       private:
+        void setTimeWheel(TimeWheel* wheel) { wh_ = wheel;}
         int timespan_;
         int rc_;//left rotation time
+        bool needRepeat_;
+        TimeWheel* wh_;
+
         friend class TimeWheel;
+        Timer(const Timer&);
+        Timer& operator=(const Timer&);
+        Timer();
     };
   private:
     typedef boost::intrusive::list
@@ -77,6 +102,7 @@ inline size_t TimeWheel::wheelSize() const {
 inline size_t TimeWheel::getFrequence() const {
   return frequence_;
 }
+
 
 }
 #endif

@@ -26,7 +26,7 @@ void TimeWheel::addTimer(TimeWheel::Timer& timer) {
 
   Spoke*  spokes = wheel_;
 
-  int nc = (timer.getTimeSpan() + frequence_ - 1) / frequence_;
+  int nc = (timer.getTimeSpan()  + frequence_ - 1) / frequence_;
 
   if (nc == 0) {
     nc++;
@@ -37,12 +37,13 @@ void TimeWheel::addTimer(TimeWheel::Timer& timer) {
   int offset = (currentIndex_ + nc) % wheelSize_;
 
   spokes[offset].push_front(timer);
+  timer.setTimeWheel(this);
 }
 
 
 /**
  * @brief
- * every @frequent  ms,
+ * every @frequent  ms, this will be invoked
  */
 
 int TimeWheel::tick() {
@@ -54,20 +55,23 @@ int TimeWheel::tick() {
   std::vector<Timer*> waits;
 
   for (Spoke::iterator it(list.begin()), itend(list.end());
-       it != itend;)  {
+       it != itend;
+       it++)  {
     if ((*it).rc_ == 1) {
       waits.push_back(&(*it));//just record the pointer of it.
-      it = list.erase(it);
-
+//      it = list.erase(it);
     } else {
       assert(it->rc_ > 1);
       it->rc_--;
-      it++;
     }
   }
 
   for (size_t i = 0; i < waits.size(); i++) {
     waits[i]->callback();
+  }
+
+  for (size_t i = 0; i< waits.size(); i++) {
+    waits[i]->stop();
   }
 
   return 0;
@@ -81,6 +85,13 @@ size_t TimeWheel::totalTimers() const {
   }
 
   return sum;
+}
+
+void TimeWheel::run(int milliseconds) {
+  int nc = (milliseconds + frequence_ -1 )/ frequence_;
+  if (nc  == 0) nc++;
+  for(int i = 0; i < nc; i++)
+    tick();
 }
 
 

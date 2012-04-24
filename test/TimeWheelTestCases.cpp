@@ -3,34 +3,37 @@
 #include <boost/test/test_tools.hpp>
 #include <tr1/memory>
 #include <vector>
-#include "TimerUtil.hpp"
+#include "TimeWheel.hpp"
 
-using namespace NDSL;
+using namespace ndsl;
 using namespace std;
+typedef TimeWheel::Timer Timer;
 
 namespace {
 
-class Job : public BaseJob {
+class Job : public TimeWheel::Timer {
  public :
-  int run(Timer* ) {
-    return 0;
+  Job(int s, bool f=false) : Timer(s, f){}
+  void callback() { 
   }
 };
 
-class StopTimer : public BaseJob {
+class StopTimer : public TimeWheel::Timer {
  public :
-  int run(Timer* timer) {
+  StopTimer(int s, bool f=false) : Timer(s, f){}
+  void callback() { 
     using namespace std;
-    tr1::shared_ptr<BaseJob> job(new Job());          
-    //creat  one-shot 100ms, 500ms,600ms timers
-    tr1::shared_ptr<Timer> timer1(new Timer(job, 100,false));
-    tr1::shared_ptr<Timer> timer2(new Timer(job, 500,false));
-    tr1::shared_ptr<Timer> timer3(new Timer(job, 600,false));
-    timer->getTimeWheel()->addTimer(timer1);
-    timer->getTimeWheel()->addTimer(timer2);
-    timer->getTimeWheel()->addTimer(timer3);
-    timer->getTimeWheel()->stopTimer(timer);
-    return 0;
+    
+    //creat  100ms, 500ms,600ms one-shot timers
+    Timer*  timer1 = new Job(100);
+    Timer*  timer2 = new Job(500);
+    Timer*  timer3 = new Job(600);
+    this->getTimeWheel()->addTimer(*timer1);
+    this->getTimeWheel()->addTimer(*timer2);
+    this->getTimeWheel()->addTimer(*timer3);
+
+    //stop this repeated timer
+    this->stop();
   }
 };
 
@@ -39,136 +42,124 @@ class StopTimer : public BaseJob {
 
 void TimeWheelTestCases::testDefaultCtor() {
   TimeWheel wheel;    
-  BOOST_CHECK(wheel.getGranularity() == 100);
+  BOOST_CHECK(wheel.getFrequence() == 100);
 }
 
 void TimeWheelTestCases::testCtors() {
   TimeWheel wheel(200);
-  BOOST_CHECK(wheel.getGranularity() == 200);
+  BOOST_CHECK(wheel.getFrequence() == 200);
 }
 
 void TimeWheelTestCases::testAddandDelete() {
   TimeWheel  wheel;
-  tr1::shared_ptr<BaseJob> job(new BaseJob());                                                                                         
-  tr1::shared_ptr<Timer> timer(new Timer(job, 100,true));
-  wheel.addTimer(timer);
+  TimeWheel::Timer* job(new Job(100));
+  wheel.addTimer(*job);
   BOOST_CHECK(wheel.totalTimers() == 1);
-  wheel.stopTimer(timer);
+  job->stop();
   BOOST_CHECK(wheel.totalTimers() == 0);
 }
 
-void TimeWheelTestCases::testIllegalDelete() {
-  TimeWheel wheel;
-  tr1::shared_ptr<BaseJob> job(new BaseJob());                                                                                         
-  tr1::shared_ptr<Timer> timer(new Timer(job, 100,true));
-  //insert a timer which is not inserted
-  BOOST_CHECK(wheel.stopTimer(timer) == -1);
-}
 
 void TimeWheelTestCases::testAddandDelete2() {
   TimeWheel wheel;
-  vector<tr1::shared_ptr<Timer> > timers;
+  vector<TimeWheel::Timer* > jobs;
 
-  for(int i = 1; i<= 10000; i++) {
-    tr1::shared_ptr<BaseJob> job(new BaseJob());          
-    tr1::shared_ptr<Timer> timer(new Timer(job, 100,true));
-    timers.push_back(timer);
-    wheel.addTimer(timer);
+  for(size_t i = 1; i<= 10000; i++) {
+    jobs.push_back(new Job(100)); 
+    wheel.addTimer(*jobs[i-1]);
     BOOST_CHECK(wheel.totalTimers() == i);
   }
   for(int i = 9999; i>= 0; i--) {
-    int status = wheel.stopTimer(timers[i]);
-    BOOST_CHECK(status == 0);
-    BOOST_CHECK(wheel.totalTimers() == i);
+    jobs[i]->stop();
+    BOOST_CHECK(wheel.totalTimers() == (size_t)i);
   }
 }
 
 void TimeWheelTestCases::testTicks() {
-  tr1::shared_ptr<TimeWheel> wheel(new  TimeWheel(100,5));
-  tr1::shared_ptr<BaseJob> job(new Job());          
+  TimeWheel* wheel = new TimeWheel(100,5);
   //creat a one-shot timer
-  tr1::shared_ptr<Timer> timer1(new Timer(job, 100,false));
+  Timer* timer1(new Job(100,false));
 
   //creat a one-shot timer
-  tr1::shared_ptr<Timer> timer2(new Timer(job, 600,false));
+  Timer* timer2(new Job(600,false));
 
   //creat a one-shot timer
-  tr1::shared_ptr<Timer> timer3(new Timer(job, 800,false));
+  Timer* timer3(new Job(800,false));
 
   //creat a one-shot timer
-  tr1::shared_ptr<Timer> timer4(new Timer(job, 500,false));
+  Timer* timer4(new Job(500,false));
 
   BOOST_CHECK(wheel->totalTimers() == 0);
-  wheel->addTimer(timer1);
-  wheel->addTimer(timer2);
-  wheel->addTimer(timer3);
-  wheel->addTimer(timer4);
+  wheel->addTimer(*timer1);
+  wheel->addTimer(*timer2);
+  wheel->addTimer(*timer3);
+  wheel->addTimer(*timer4);
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 4);
 
 /*  tr1::shared_ptr<TimeDriver> driver(new TimeDriverBySelect);
   driver->mountTimeWheel(wheel);
   driver->start();   */
 
-  //simulate just as if there is a time driver drive this wheel.
-  wheel->perTickBookKeeping();//100
+  //simulate just as if there is a  time_driver drive this wheel.
+  wheel->run(100);//100
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  wheel->perTickBookKeeping();//200
+  wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  wheel->perTickBookKeeping();//300
+  wheel->run(100);//300
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  wheel->perTickBookKeeping();//400
+  wheel->run(100);//400
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  wheel->perTickBookKeeping();//500
+  wheel->run(100);//500
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
 
 
-  wheel->perTickBookKeeping();//600
+  wheel->run(100);//600
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
 
 
-  wheel->perTickBookKeeping();//700
+  wheel->run(100);//700
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
 
 
-  wheel->perTickBookKeeping();//800
+  wheel->run(100);//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 
-  wheel->perTickBookKeeping();//900
+  wheel->run(100);//900
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 
-  wheel->perTickBookKeeping();//1000
+  wheel->run(100);//1000
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); 
 }
 
 void TimeWheelTestCases::testAddRemoveInBaseJob() {
-  tr1::shared_ptr<TimeWheel> wheel(new  TimeWheel(100,5));
-  tr1::shared_ptr<BaseJob> job(new StopTimer());          
+  TimeWheel* wheel = new TimeWheel(100,5);
+  
+  Timer* job(new StopTimer(100, true));          
   //creat a one-shot timer
-  tr1::shared_ptr<Timer> timer1(new Timer(job, 100,true));
 
-  wheel->addTimer(timer1);
+  wheel->addTimer(*job);
 
   //simulate
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
-  wheel->perTickBookKeeping();//100
+  wheel->run(100);//100
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create two
   
-  wheel->perTickBookKeeping();//200
+  wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired one
-  wheel->perTickBookKeeping();//300
+  wheel->run(100);//300
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->perTickBookKeeping();//400
+  wheel->run(100);//400
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->perTickBookKeeping();//500
+  wheel->run(100);//500
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->perTickBookKeeping();//600
+  wheel->run(100);//600
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired 
-  wheel->perTickBookKeeping();//700
+  wheel->run(100);//700
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired 
-  wheel->perTickBookKeeping();//800
+  wheel->run(100);//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
 }
