@@ -1,56 +1,69 @@
-#ifndef NDSL_TIME_WHEEL_H
-#define NDSL_TIME_WHEEL_H
+#ifndef _NDSL_TIME_WHEEL_H_
+#define _NDSL_TIME_WHEEL_H_
 
-#include <tr1/memory>
-#include <list>
-#include "Timer.hpp"
+#include <boost/intrusive/list.hpp>
 
-namespace NDSL {
-
-
-class Timer;
+namespace ndsl {
 
 class TimeWheel {
-   //rotationtimes with Time*
-   typedef std::pair<int, std::tr1::shared_ptr<Timer> > DataType;
-   typedef std::pair<int, std::list<DataType>::iterator> TimerId;
   public:
-   //the granulary is in milliseconds.
-   TimeWheel(long granulary = 100, int wheelSize = 256 * 4);
-   virtual ~TimeWheel();
+    class Timer {
+      public:
+        Timer(int timespan) : timespan_(timespan) {}
+        boost::intrusive::list_member_hook<<link_mode<auto_unlink> > timeHook_;
 
-   //register  a  timer
-   void addTimer(std::tr1::shared_ptr<Timer> timer);
-   //stop a running timer
-   int stopTimer(std::tr1::shared_ptr<Timer> timer);
-   //user has responssibility to delete timer's memory.
-   int stopTimer(Timer* timer);
-   
-   int expiryProcessing(std::tr1::shared_ptr<Timer> timer) const;
-   //invoked in every  @granulary millisecnods.  should not called by user.
-   int perTickBookKeeping();
-   int totalTimers() const;   
-   size_t getGranularity() const {
-     return granularity_;
-   }
+        //MUST NOT free the timer's memory when callback()!
+        virtual void callback() = 0;
+        int getTimeSpan()const {
+          return timespan_;
+        }
 
+        void stop() {
+          if (timeHook_.is_linked())
+            timeHook_.unlink();
+        }
+
+      private:
+        int timespan_;
+        int rt_;//left rotation time
+    };
   private:
-   int stopTimer(TimerId id);
+    typedef boost::intrusive::list<Timer, boost::intrusive::list_member_hook<<link_mode<auto_unlink> >,&Timer::timeHook_> Spoke;
+  public:
+    TimeWheel(int frequence = 100, int wheelSize_ = 1024);
+    virtual ~TimeWheel();
 
-   typedef std::list<DataType> Spoke;
-   typedef std::tr1::shared_ptr<Spoke> SpokeWheelPtr;
+    void run(int milliseconds);
 
-   SpokeWheelPtr spokewheel_;
-   long granularity_;
-   int currentIndex_;
-   int wheelSize_;
+    void addTimer(Timer& timer);
+//    void deleteTimer(Timer& timer);
 
-   bool isLegal(TimerId id) const;
+    size_t totalTimers() const;
+    size_t wheelSize() const;
+    size_t getFrequence() const;
   
-   //forbid  copy semantic
-   TimeWheel(const TimeWheel&);
-   TimeWheel& operator=(const TimeWheel& timewheel);
+  private:
+    int tick();
+
+    Spoke* wheel_;
+    int currentIndex_;
+    size_t wheelSize_;
+    size_t frequence_;
+    size_t timers_;
+    
 };
 
+inline TimeWheel::totalTimers() {
+  return timers_;
 }
-#endif  
+
+inline TimeWheel::wheelSize() {
+  return wheelSize_;
+}
+
+inline TimeWheel::getFrequence() {
+  return frequence_;
+}
+
+}
+#endif
