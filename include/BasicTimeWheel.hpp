@@ -9,7 +9,7 @@ class BasicTimeWheel {
   public:
     class Timer {
       public:
-        explicit Timer(int timespan, bool needRepeat = false) 
+        explicit Timer(int timespan = 100, bool needRepeat = false) 
             : timespan_(timespan),
               needRepeat_(needRepeat_) ,
               wh_(0) {
@@ -27,6 +27,10 @@ class BasicTimeWheel {
 
         int getTimeSpan()const {
           return timespan_;
+        }
+
+        void setTimeSpan(int timespan) {
+          timespan_ = timespan;
         }
 
         bool isRegistered() const {
@@ -58,7 +62,6 @@ class BasicTimeWheel {
         friend class BasicTimeWheel;
         Timer(const Timer&);
         Timer& operator=(const Timer&);
-        Timer();
     };
 
   protected:
@@ -77,7 +80,7 @@ class BasicTimeWheel {
           boost::intrusive::constant_time_size<false> 
       > Spoke;
   public:
-    explicit BasicTimeWheel(int frequence = 100, int wheelSize_ = 1024);
+    explicit BasicTimeWheel(size_t frequence = 100, int wheelSize_ = 1024);
     virtual ~BasicTimeWheel();
 
     //run  every @frequence ms

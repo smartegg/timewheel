@@ -47,7 +47,8 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
 am____bin_test_OBJECTS = test.$(OBJEXT) TimerTestCases.$(OBJEXT) \
-	TimeWheelTestCases.$(OBJEXT)
+	TimeWheelTestCases.$(OBJEXT) \
+	AdvanceTimeWheelTestCases.$(OBJEXT)
 ___bin_test_OBJECTS = $(am____bin_test_OBJECTS)
 ___bin_test_DEPENDENCIES = $(top_builddir)/lib/libtimewheel.a
 ___bin_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
@@ -182,8 +183,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir)/include
-___bin_test_SOURCES = test.cc  TimerTestCases.cpp TimeWheelTestCases.cpp 
-include_HEADERS = suites.h TimerTestCases.hpp TimeWheelTestCases.hpp 
+___bin_test_SOURCES = test.cc  TimerTestCases.cpp TimeWheelTestCases.cpp  AdvanceTimeWheelTestCases.cpp
+include_HEADERS = suites.h TimerTestCases.hpp TimeWheelTestCases.hpp  AdvanceTimeWheelTestCases.hpp
 EXTRA_DIST = 
 # NOTE: link against to local generated lib, MUST use LDADD
 ___bin_test_LDADD = $(top_builddir)/lib/libtimewheel.a
@@ -238,6 +239,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AdvanceTimeWheelTestCases.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeWheelTestCases.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimerTestCases.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@

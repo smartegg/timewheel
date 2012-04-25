@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <vector>
+#include <cstdio>
 
 
 
@@ -9,7 +10,7 @@ namespace ndsl {
 
 using namespace boost;
 
-BasicTimeWheel::BasicTimeWheel(int frequence, int wheelSize)
+BasicTimeWheel::BasicTimeWheel(size_t frequence, int wheelSize)
   : currentIndex_(0),
     wheelSize_(wheelSize) ,
     frequence_(frequence) {
@@ -62,18 +63,14 @@ std::vector<BasicTimeWheel::Timer*>& BasicTimeWheel::tick() {
     if ((*it).rc_ == 1) {
       waits.push_back(&(*it));//just record the pointer of it.
     } else {
+      //never reach this.
+      printf("test: %d %d\n",it->getTimeSpan(), it->rc_);
+      assert(0);
       assert(it->rc_ > 1);
       it->rc_--;
     }
   }
 
-  for (size_t i = 0; i < waits.size(); i++) {
-    waits[i]->callback();
-  }
-
-  for (size_t i = 0; i< waits.size(); i++) {
-    waits[i]->stop();
-  }
 
   return waits;
 }
