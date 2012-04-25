@@ -1,5 +1,5 @@
-#ifndef NDSL_TIMER_UTIL_HPP
-#define NDSL_TIMER_UTIL_HPP
+#ifndef _NDSL_TIMER_UTIL_HPP_
+#define _NDSL_TIMER_UTIL_HPP_
 
 #include <cstdio>
 #include <unistd.h>
@@ -14,4 +14,4 @@
 #include "TimeDriverByTimeFd.hpp"
 #include "TimeDriverBySelect.hpp"
 
-#endif
+#endif //_NDSL_TIMER_UTIL_HPP_

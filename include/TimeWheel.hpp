@@ -1,5 +1,5 @@
-#ifndef _NDSL_TIME_WHEEL_H_
-#define _NDSL_TIME_WHEEL_H_
+#ifndef _NDSL_TIME_WHEEL_HPP_
+#define _NDSL_TIME_WHEEL_HPP_
 
 #include <boost/intrusive/list.hpp>
 
@@ -104,5 +104,5 @@ inline size_t TimeWheel::getFrequence() const {
 }
 
 
-}
-#endif
+}//namespace ndsl
+#endif //_NDSL_TIME_WHEEL_HPP_

@@ -1,5 +1,5 @@
-#ifndef NDSL_SINGELETON_TIME_DRIVER_H
-#define NDSL_SINGELETON_TIME_DRIVER_H
+#ifndef _NDSL_SINGELETON_TIME_DRIVER_HPP_
+#define _NDSL_SINGELETON_TIME_DRIVER_HPP_
 
 #include "TimeDriver.hpp"
 #include <signal.h>
@@ -13,32 +13,32 @@
 //so can only use only one granularity when drive all timewheel.
 //prefer the timewheel's granularity is multiple times of timedriver's granularity.
 
-namespace NDSL {
+namespace ndsl {
 
 extern void sigalrmhandler(int signum);
 
-class SingeletonTimeDriver : public TimeDriver{
- public:
-  virtual ~SingeletonTimeDriver();
-  static SingeletonTimeDriver* getInstance() ;
-  int start();
-  
+class SingeletonTimeDriver : public TimeDriver {
+  public:
+    virtual ~SingeletonTimeDriver();
+    static SingeletonTimeDriver* getInstance() ;
+    int start();
 
- protected:
-  friend void NDSL::sigalrmhandler(int signum);
 
- private:
-  explicit SingeletonTimeDriver(long granularity = TimeDriver::DEFAULT_GRANULARITY);
-  
-  //below used in setitimer
-  struct itimerval timer_;
-  struct sigaction sa_;
-  static SingeletonTimeDriver* driver_;
-  std::vector<std::tr1::shared_ptr<TimeWheel> > array_;
+  protected:
+    friend void NDSL::sigalrmhandler(int signum);
 
-  SingeletonTimeDriver(const SingeletonTimeDriver&);
-  SingeletonTimeDriver& operator=(const SingeletonTimeDriver&);
+  private:
+    explicit SingeletonTimeDriver(long granularity = TimeDriver::DEFAULT_GRANULARITY);
+
+    //below used in setitimer
+    struct itimerval timer_;
+    struct sigaction sa_;
+    static SingeletonTimeDriver* driver_;
+    std::vector<std::tr1::shared_ptr<TimeWheel> > array_;
+
+    SingeletonTimeDriver(const SingeletonTimeDriver&);
+    SingeletonTimeDriver& operator=(const SingeletonTimeDriver&);
 };
 
-}
-#endif
+}//namespace ndsl
+#endif// _NDSL_SINGELETON_TIME_DRIVER_HPP_

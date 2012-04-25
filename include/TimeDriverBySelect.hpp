@@ -1,22 +1,22 @@
-#ifndef NDSL_TIME_DRIVER_BY_SELECT_H
-#define NDSL_TIME_DRIVER_BY_SELECT_H
+#ifndef _NDSL_TIME_DRIVER_BY_SELECT_HPP_
+#define _NDSL_TIME_DRIVER_BY_SELECT_HPP_
 
 #include "TimeDriver.hpp"
 
-namespace NDSL {
+namespace ndsl {
 
 
 /**
  * @brief  use select() method to make a timer
  */
 
-class TimeDriverBySelect : public TimeDriver{
- public:
-  explicit TimeDriverBySelect(long granularity = DEFAULT_GRANULARITY);
-  virtual ~TimeDriverBySelect();
-  virtual  int start();
+class TimeDriverBySelect : public TimeDriver {
+  public:
+    explicit TimeDriverBySelect(long granularity = DEFAULT_GRANULARITY);
+    virtual ~TimeDriverBySelect();
+    virtual  int start();
 };
 
-}
+}//namespace ndsl
 
-#endif
+#endif// _NDSL_TIME_DRIVER_BY_SELECT_HPP_
