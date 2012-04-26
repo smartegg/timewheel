@@ -31,7 +31,7 @@ class StopTimer : public Timer {
     this->getAdvanceTimeWheel()->addTimer(*timer3);
 
     //stop this repeated timer
-    this->stop();
+    this->reset();
   }
 };
 
@@ -152,17 +152,20 @@ void AdvanceTimeWheelTestCases::testAddRemoveInBaseJob() {
   
   wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired one
-  wheel->run(100);//300
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->run(100);//400
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->run(100);//500
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
-  wheel->run(100);//600
+
+
+  for(int i = 201; i < 600; i++) { 
+    wheel->run(1);
+    BOOST_CHECK_MESSAGE(wheel->totalTimers()==2, " " << wheel->totalTimers() << "\t time:" << (i)); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  }
+  wheel->run(1);//600
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired 
   wheel->run(100);//700
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired 
   wheel->run(100);//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
 }
+//FIXME   add a testcase to check if repeat-timer is legal.
+
 

@@ -8,7 +8,7 @@
 #define GRAN2 (256)
 #define GRAN3 (64 * 256)
 #define GRAN4 (256 * 64 * 64)
-#define GRAN5 (256 * 64 * 64 * 64)
+#define GRAN5 (256LL * 64 * 64 * 64)
 
 namespace ndsl {
 //below are four helper timers to keep timer to run.
@@ -26,6 +26,8 @@ class Timer0 : public AdvanceTimeWheel::Timer {
     //a trick , just make stop useless
     //just simulate repeat, we need insert to a special wheel, not a wheel
     void stop() {}
+    void reset() {}
+    void clear() {}
 };
 
 class Timer1 : public AdvanceTimeWheel::Timer {
@@ -40,6 +42,8 @@ class Timer1 : public AdvanceTimeWheel::Timer {
     //a trick , just make stop useless
     //just simulate repeat, we need insert to a special wheel, not a wheel
     void stop() {}
+    void reset() {}
+    void clear() {}
 };
 
 
@@ -55,6 +59,8 @@ class Timer2 : public AdvanceTimeWheel::Timer {
     //a trick , just make stop useless
     //just simulate repeat, we need insert to a special wheel, not a wheel
     void stop() {}
+    void reset() {}
+    void clear() {}
 };
 
 
@@ -72,6 +78,8 @@ class Timer3 : public AdvanceTimeWheel::Timer {
     //a trick , just make stop useless
     //just simulate repeat, we need insert to a special wheel, not a wheel
     void stop() {}
+    void reset() {}
+    void clear() {}
 };
 //**  helper  classes  end **//
 
@@ -87,31 +95,52 @@ AdvanceTimeWheel::Timer::Timer(int timespan, bool needRepeat)
     timespan_(timespan),
     needRepeat_(needRepeat) ,
     wh_(0),
-    inner_(0) {
+    inner_(0) ,
+    timediff_(0) {
 
+  reset();
+}
 
-  if (timespan == 0) {
-    timespan_ = 1;
+void AdvanceTimeWheel::Timer::clear() {
+  wh_ = 0;
+  inner_ = 0;
+
+  if (timeHook_.is_linked()) {
+    timeHook_.unlink();
   }
 
+}
 
+void AdvanceTimeWheel::Timer::reset() {
   size_t sum =  0;
   int* left = left_;
   std::fill(left, left + 5, 0);
-  left[4] = getTimeSpan() / GRAN5;
-  sum  = left[4] * GRAN5;
-  left[3] = (getTimeSpan()  - sum) / GRAN4;
-  sum += left[3] * GRAN4;
-  left[2] = (getTimeSpan() - sum) / GRAN3;
-  sum += left[2] * GRAN3;
-  left[1] = (getTimeSpan() - sum) / GRAN2;
-  sum += left[1] * GRAN2;
-  left[0] = (getTimeSpan() - sum)  / GRAN1;
 
-  for (int i = 0; i < 5; i++)
+  idxlen_ = 0;
+  left[4] = getRealTimeSpan() / GRAN5;
+  sum  =  GRAN5 * left[4];
+
+  left[3] = (getRealTimeSpan()  - sum) / GRAN4;
+  sum += left[3] * GRAN4;
+
+  left[2] = (getRealTimeSpan() - sum) / GRAN3;
+  sum += left[2] * GRAN3;
+
+  left[1] = (getRealTimeSpan() - sum) / GRAN2;
+  sum += left[1] * GRAN2;
+  left[0] = (getRealTimeSpan() - sum)  / GRAN1;
+
+  for (int i = 0; i < 5; i++) {
     if (left[i] != 0) {
       idx_[idxlen_++] = i;
     }
+  }
+
+  if (timespan_ == 0) {
+    timespan_ = 1;
+  }
+
+  clear();
 }
 
 AdvanceTimeWheel::Timer::~Timer() {
@@ -119,12 +148,9 @@ AdvanceTimeWheel::Timer::~Timer() {
 }
 
 void AdvanceTimeWheel::Timer::stop() {
-  if (timeHook_.is_linked()) {
-    timeHook_.unlink();
-  }
 
-  wh_ = 0;
-  inner_ = 0;
+  clear();
+  idxlen_ = 0;
 }
 
 
@@ -158,6 +184,7 @@ class InnerTimeWheel {
     int id_;
     size_t currentIndex_;
     size_t wheelSize_;
+    friend class AdvanceTimeWheel;
 };
 
 inline size_t InnerTimeWheel::wheelSize() const {
@@ -196,6 +223,7 @@ std::vector<AdvanceTimeWheel::Timer*>& InnerTimeWheel::tick() {
       it->rc_--;
     }
   }
+
   return waits;
 }
 
@@ -227,15 +255,15 @@ void InnerTimeWheel::addTimer(Timer& timer, bool special) {
   assert(currentIndex_ < wheelSize_);
 
   assert(timer.getTimeWheel() == 0);
-/*  if (timer.getTimeWheel() != 0) {
-    printf("%d \n", timer.getTimeWheel()->id_);
-    abort();
-  } */
-  
+  /*  if (timer.getTimeWheel() != 0) {
+      printf("%d \n", timer.getTimeWheel()->id_);
+      abort();
+    } */
+
   assert(timer.getAdvanceTimeWheel() == 0);
-/*  if (timer.getAdvanceTimeWheel() != 0) {
-    abort();
-  } */
+  /*  if (timer.getAdvanceTimeWheel() != 0) {
+      abort();
+    } */
 
 
   timer.setTimeWheel(this);
@@ -247,8 +275,10 @@ void InnerTimeWheel::addTimer(Timer& timer, bool special) {
 
   assert(timer.idxlen_ - 1 >= 0);
   int nc = (timer.left_[id_]);
-  if (special)
+
+  if (special) {
     nc = this->wheelSize_;
+  }
 
   if (nc == 0) {
     nc++;
@@ -310,8 +340,20 @@ size_t AdvanceTimeWheel::totalTimers() const {
 
 void AdvanceTimeWheel::addTimer(AdvanceTimeWheel::Timer& timer) {
   //FIXME: consider if the timer is 0ms, just run it now.
-  timer.stop();
+  timer.clear();
   assert(timer.idxlen_  - 1 >= 0);
+
+  int sum  = 0;
+  if (timer.idxlen_ > 1)
+    sum += wheels_[0]->currentIndex_ * GRAN1;
+  if (timer.idxlen_ > 2)
+    sum += wheels_[1]->currentIndex_ * GRAN2;
+  if (timer.idxlen_ > 3)
+    sum += wheels_[2]->currentIndex_ * GRAN3;
+  if (timer.idxlen_ > 4)
+    sum += wheels_[3]->currentIndex_ * GRAN4;
+  timer.setTimeDiff(sum);
+  timer.reset();
   wheels_[timer.idxlen_ - 1]->addTimer(timer);
 }
 
@@ -326,9 +368,12 @@ void AdvanceTimeWheel::tick() {
     if (!(timers[i]->isRegistered())) {
       continue;
     }
-    timers[i]->stop();
+
+    timers[i]->clear();
+
     if (timers[i]->needRepeat()) {
       Timer* timer = timers[i];
+      timer->reset();
       assert(timer != 0);
       addTimer(*timer);
     }
@@ -350,14 +395,14 @@ void AdvanceTimeWheel::move_timers(int wheelId) {
 
   vector<Timer*> delay;
 
-
   for (size_t i = 0; i < timers.size(); i++) {
     Timer* timer = timers[i];
     int& len = timer->idxlen_;
+
     if (len > 1) {
-      timer->stop();
       len--;
-      wheels_[len-1]->addTimer(*timer);
+      timer->clear();
+      wheels_[len - 1]->addTimer(*timer);
 
     } else {
       //expired callback
@@ -373,9 +418,11 @@ void AdvanceTimeWheel::move_timers(int wheelId) {
     if (!(timers[i]->isRegistered())) {
       continue;
     }
-    delay[i]->stop();
+
+    delay[i]->clear();
 
     if (delay[i]->needRepeat()) {
+      delay[i]->reset();
       addTimer(*delay[i]);
     }
   }

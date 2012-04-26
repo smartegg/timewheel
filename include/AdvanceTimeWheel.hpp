@@ -22,12 +22,23 @@ class AdvanceTimeWheel {
         void setTimeSpan(int timespan);
         bool isRegistered() const;
         bool needRepeat() const;
+        //just kill the timer,and make the timer in an invalid state
+        //so you can not reinsert it into the timewheel
+        //reinsert action is undefined.
         virtual void stop();
         AdvanceTimeWheel* getAdvanceTimeWheel() const;
+      protected:
+        virtual void clear() ;
+        //kill the timer, and reset the timer origin time arm, so you can
+        //reinert into the TimeWheel
+        virtual void reset();
       private:
+        
         InnerTimeWheel* getTimeWheel()const;
         void setAdvanceTimeWheel(AdvanceTimeWheel* wheel);
         void setTimeWheel(InnerTimeWheel* wheel);
+        void setTimeDiff(int diff);
+        int getRealTimeSpan() const;
 
         int idx_[5];
         int idxlen_;
@@ -38,6 +49,7 @@ class AdvanceTimeWheel {
         bool needRepeat_;
         AdvanceTimeWheel* wh_;
         InnerTimeWheel* inner_;
+        int timediff_;
 
         friend class AdvanceTimeWheel;
         friend class InnerTimeWheel;
@@ -83,6 +95,15 @@ inline InnerTimeWheel* AdvanceTimeWheel::Timer::getTimeWheel() const {
   return inner_;
 }
 
+inline void AdvanceTimeWheel::Timer::setTimeDiff(int timediff) {
+  timediff_ =  timediff;
+}
+
+
+inline int AdvanceTimeWheel::Timer::getRealTimeSpan() const {
+  return timediff_ + timespan_;
+}
+
 inline AdvanceTimeWheel* AdvanceTimeWheel::Timer::getAdvanceTimeWheel() const {
   return wh_;
 }
@@ -96,6 +117,8 @@ inline void AdvanceTimeWheel::Timer::setTimeWheel(
   InnerTimeWheel* inner) {
   inner_ = inner;
 }
+
+
 
 
 } //namespace ndsl

@@ -47,6 +47,7 @@ void TimeWheel::addTimer(TimeWheel::Timer& timer) {
  */
 
 int TimeWheel::tick() {
+  //FIXME: not consider the repeated-timer.
   currentIndex_++;
   currentIndex_ %= wheelSize_;
 
