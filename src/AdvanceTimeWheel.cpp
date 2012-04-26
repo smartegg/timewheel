@@ -83,11 +83,11 @@ using namespace boost::intrusive;
 
 
 AdvanceTimeWheel::Timer::Timer(int timespan, bool needRepeat)
-  : timespan_(timespan),
+  : idxlen_(0) ,
+    timespan_(timespan),
     needRepeat_(needRepeat) ,
     wh_(0),
-    inner_(0) ,
-    idxlen_(0) {
+    inner_(0) {
 
 
   if (timespan == 0) {
@@ -114,6 +114,10 @@ AdvanceTimeWheel::Timer::Timer(int timespan, bool needRepeat)
     }
 }
 
+AdvanceTimeWheel::Timer::~Timer() {
+
+}
+
 void AdvanceTimeWheel::Timer::stop() {
   if (timeHook_.is_linked()) {
     timeHook_.unlink();
@@ -136,7 +140,7 @@ class InnerTimeWheel {
     size_t wheelSize() const;
 
     std::vector<Timer*>& tick();
-    void addTimer(Timer& timer);
+    void addTimer(Timer& timer, bool special = false);
     AdvanceTimeWheel* getParent() const;
   protected:
     typedef list < Timer, member_hook < Timer,
@@ -169,6 +173,31 @@ inline size_t InnerTimeWheel::totalTimers()  const {
 
   return sum;
 }
+std::vector<AdvanceTimeWheel::Timer*>& InnerTimeWheel::tick() {
+  static std::vector<AdvanceTimeWheel::Timer*> waits;
+
+  currentIndex_++;
+  currentIndex_ %= wheelSize_;
+
+  Spoke*  spokes =  wheel_;
+  Spoke& list =  spokes[currentIndex_];
+  waits.clear();
+
+  for (Spoke::iterator it(list.begin()), itend(list.end());
+       it != itend;
+       it++)  {
+    if ((*it).rc_ == 1) {
+      waits.push_back(&(*it));//just record the pointer of it.
+
+    } else {
+      //never reach this.
+      assert(0);
+      printf("test: %d %d\n", it->getTimeSpan(), it->rc_);
+      it->rc_--;
+    }
+  }
+  return waits;
+}
 
 
 InnerTimeWheel::InnerTimeWheel(AdvanceTimeWheel* wh,
@@ -177,7 +206,7 @@ InnerTimeWheel::InnerTimeWheel(AdvanceTimeWheel* wh,
   : wh_(wh),
     id_(id),
     currentIndex_(0),
-    wheelSize_(wheelSize_ = wheelSize) {
+    wheelSize_(wheelSize) {
   wheel_ = new Spoke[wheelSize];
 }
 
@@ -193,11 +222,21 @@ inline AdvanceTimeWheel* InnerTimeWheel::getParent() const {
 }
 
 
-void InnerTimeWheel::addTimer(Timer& timer) {
+void InnerTimeWheel::addTimer(Timer& timer, bool special) {
   //FIXME: if the timer is 0ms, just run it now.
   assert(currentIndex_ < wheelSize_);
+
   assert(timer.getTimeWheel() == 0);
+/*  if (timer.getTimeWheel() != 0) {
+    printf("%d \n", timer.getTimeWheel()->id_);
+    abort();
+  } */
+  
   assert(timer.getAdvanceTimeWheel() == 0);
+/*  if (timer.getAdvanceTimeWheel() != 0) {
+    abort();
+  } */
+
 
   timer.setTimeWheel(this);
 
@@ -208,6 +247,8 @@ void InnerTimeWheel::addTimer(Timer& timer) {
 
   assert(timer.idxlen_ - 1 >= 0);
   int nc = (timer.left_[id_]);
+  if (special)
+    nc = this->wheelSize_;
 
   if (nc == 0) {
     nc++;
@@ -230,17 +271,17 @@ AdvanceTimeWheel::AdvanceTimeWheel() {
   wheels_[4]  = new InnerTimeWheel(this, 4, 64);
 
   timers_[0] = new  Timer0(256 , false);
-  wheels_[0]->addTimer(*timers_[0]);
+  wheels_[0]->addTimer(*timers_[0], true);
 
 
   timers_[1] = new  Timer1(256 * 64 , false);
-  wheels_[1]->addTimer(*timers_[1]);
+  wheels_[1]->addTimer(*timers_[1], true);
 
   timers_[2] = new  Timer2(256 * 64 * 64, false);
-  wheels_[2]->addTimer(*timers_[2]);
+  wheels_[2]->addTimer(*timers_[2], true);
 
   timers_[3] = new  Timer3(256LL * 64 * 64 * 64, false);
-  wheels_[3]->addTimer(*timers_[3]);
+  wheels_[3]->addTimer(*timers_[3], true);
 
 }
 
@@ -268,25 +309,29 @@ size_t AdvanceTimeWheel::totalTimers() const {
 
 
 void AdvanceTimeWheel::addTimer(AdvanceTimeWheel::Timer& timer) {
-  //FIXME: if the timer is 0ms, just run it now.
+  //FIXME: consider if the timer is 0ms, just run it now.
   timer.stop();
-  assert(timer.idxlen_  - 1>= 0);
-  wheels_[timer.idxlen_ - 1]->addTimer(timer); 
+  assert(timer.idxlen_  - 1 >= 0);
+  wheels_[timer.idxlen_ - 1]->addTimer(timer);
 }
 
 void AdvanceTimeWheel::tick() {
-  std::vector<AdvanceTimeWheel::Timer*> timers = wheels_[0]->tick(); 
+  std::vector<AdvanceTimeWheel::Timer*> timers = wheels_[0]->tick();
+
   for (size_t i = 0; i < timers.size(); i++) {
     timers[i]->callback();
   }
 
   for (size_t i = 0; i < timers.size(); i++) {
+    if (!(timers[i]->isRegistered())) {
+      continue;
+    }
     timers[i]->stop();
-    if(timers[i]->needRepeat()) {
+    if (timers[i]->needRepeat()) {
       Timer* timer = timers[i];
       assert(timer != 0);
       addTimer(*timer);
-    } 
+    }
   }
 }
 
@@ -299,20 +344,21 @@ void AdvanceTimeWheel::move_timers(int wheelId) {
   using namespace std;
   assert(wheelId >= 0 && wheelId < 5);
 
-  vector<AdvanceTimeWheel::Timer*>& timers =
-      wheels_[wheelId]->tick();
+  typedef AdvanceTimeWheel::Timer Timer;
+  vector<Timer*>& timers =
+    wheels_[wheelId]->tick();
 
   vector<Timer*> delay;
 
-  typedef AdvanceTimeWheel::Timer Timer;
+
   for (size_t i = 0; i < timers.size(); i++) {
     Timer* timer = timers[i];
     int& len = timer->idxlen_;
     if (len > 1) {
       timer->stop();
-      timer->setAdvanceTimeWheel(this);
       len--;
-      wheels_[len]->addTimer(*timer);
+      wheels_[len-1]->addTimer(*timer);
+
     } else {
       //expired callback
       delay.push_back(timer);
@@ -324,16 +370,22 @@ void AdvanceTimeWheel::move_timers(int wheelId) {
   }
 
   for (size_t i = 0; i < delay.size(); i++) {
+    if (!(timers[i]->isRegistered())) {
+      continue;
+    }
     delay[i]->stop();
-    if(delay[i]->needRepeat()) {
+
+    if (delay[i]->needRepeat()) {
       addTimer(*delay[i]);
     }
   }
 
+}
 
-
-  
-
+void AdvanceTimeWheel::run(int milliseconds) {
+  for (int i = 0; i < milliseconds; i++) {
+    tick();
+  }
 }
 
 

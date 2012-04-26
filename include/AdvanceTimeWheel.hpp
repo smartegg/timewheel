@@ -72,7 +72,7 @@ inline void AdvanceTimeWheel::Timer::setTimeSpan(int timespan) {
 }
 
 inline bool AdvanceTimeWheel::Timer::isRegistered() const {
-  return timeHook_.is_linked();
+  return timeHook_.is_linked() && wh_!= 0 && inner_ != 0;
 }
 
 inline bool AdvanceTimeWheel::Timer::needRepeat() const {

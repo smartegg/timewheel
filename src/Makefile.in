@@ -48,7 +48,7 @@ ARFLAGS = cru
 ___lib_libtimewheel_a_AR = $(AR) $(ARFLAGS)
 ___lib_libtimewheel_a_LIBADD =
 am____lib_libtimewheel_a_OBJECTS = TimeWheel.$(OBJEXT) \
-	BasicTimeWheel.$(OBJEXT) AdvanceTimeWheel.$(OBJEXT)
+	AdvanceTimeWheel.$(OBJEXT)
 ___lib_libtimewheel_a_OBJECTS = $(am____lib_libtimewheel_a_OBJECTS)
 am__dirstamp = $(am__leading_dot)dirstamp
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -158,7 +158,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir)/include
 noinst_LIBRARIES = ../lib/libtimewheel.a
-___lib_libtimewheel_a_SOURCES = TimeWheel.cpp  BasicTimeWheel.cpp AdvanceTimeWheel.cpp
+___lib_libtimewheel_a_SOURCES = TimeWheel.cpp  AdvanceTimeWheel.cpp
 all: all-am
 
 .SUFFIXES:
@@ -211,7 +211,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AdvanceTimeWheel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BasicTimeWheel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeWheel.Po@am__quote@
 
 .cpp.o:

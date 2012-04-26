@@ -4284,7 +4284,7 @@ fi
 
 # Check whether --enable-debug was given.
 if test "${enable_debug+set}" = set; then :
-  enableval=$enable_debug;  CXXFLAGS="-g2 -O0 -DDEBUG -Wall -Werror -std=c++0x"
+  enableval=$enable_debug;  CXXFLAGS="-g2 -O0 -DDEBUG -Wall -Werror -std=c++0x -g"
 else
    CXXFLAGS="-O3 -Wall -Werror -std=c++0x"
 fi

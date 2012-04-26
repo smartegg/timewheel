@@ -35,7 +35,7 @@ class StopTimer : public Timer {
   }
 };
 
-}//namespace  ano
+}//no-name namespace  
 
 
 void AdvanceTimeWheelTestCases::testAddandDelete() {
@@ -100,8 +100,12 @@ void AdvanceTimeWheelTestCases::testTicks() {
   wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
 
-  wheel->run(100);//300
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
+  for(int i = 0; i < 100; i++) {
+  wheel->run(1);
+    BOOST_CHECK_MESSAGE(wheel->totalTimers()==3, " " << wheel->totalTimers() << "\t time:" << ( 200+i+1)); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
+    
+  }
 
   wheel->run(100);//400
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
@@ -144,7 +148,7 @@ void AdvanceTimeWheelTestCases::testAddRemoveInBaseJob() {
   //simulate
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
   wheel->run(100);//100
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create two
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create three
   
   wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired one

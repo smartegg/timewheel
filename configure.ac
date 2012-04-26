@@ -15,7 +15,7 @@ AC_PROG_RANLIB
 AC_PROG_MKDIR_P
 
 AC_ARG_ENABLE(debug, [  --enable-debug	Enable DEBUG output. ],
-	[ CXXFLAGS="-g2 -O0 -DDEBUG -Wall -Werror -std=c++0x" ],
+	[ CXXFLAGS="-g2 -O0 -DDEBUG -Wall -Werror -std=c++0x -g" ],
 	[ CXXFLAGS="-O3 -Wall -Werror -std=c++0x" ])
 # Checks for libraries.
 # FIXME: Replace `main' with a function in `-lboost_unit_test_framework':
