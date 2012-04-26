@@ -7,6 +7,7 @@ class AdvanceTimeWheelTestCases {
   void testAddandDelete2();
   void testTicks();
   void testAddRemoveInBaseJob();
+  void testRepeatTimer();
 
 };
 #endif //_ADVANCE_TIMEWHEEL_TESTCASES_HPP_

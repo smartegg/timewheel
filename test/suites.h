@@ -29,12 +29,14 @@ public:
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testAddandDelete2, instance_timewheel));
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testTicks, instance_timewheel));
     add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testAddRemoveInBaseJob, instance_timewheel));
+    add(BOOST_CLASS_TEST_CASE(&TimeWheelTestCases::testRepeatTimer, instance_timewheel));
 
     boost::shared_ptr<AdvanceTimeWheelTestCases> instance_timewheel_advance(new AdvanceTimeWheelTestCases());
     add(BOOST_CLASS_TEST_CASE(&AdvanceTimeWheelTestCases::testAddandDelete, instance_timewheel_advance));
     add(BOOST_CLASS_TEST_CASE(&AdvanceTimeWheelTestCases::testAddandDelete2, instance_timewheel_advance));
     add(BOOST_CLASS_TEST_CASE(&AdvanceTimeWheelTestCases::testTicks, instance_timewheel_advance));
     add(BOOST_CLASS_TEST_CASE(&AdvanceTimeWheelTestCases::testAddRemoveInBaseJob, instance_timewheel_advance));
+    add(BOOST_CLASS_TEST_CASE(&AdvanceTimeWheelTestCases::testRepeatTimer, instance_timewheel_advance));
 
 	}
 };

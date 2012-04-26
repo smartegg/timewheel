@@ -10,7 +10,7 @@ class TimeWheel {
       public:
         explicit Timer(int timespan, bool needRepeat = false) 
             : timespan_(timespan),
-              needRepeat_(needRepeat_) ,
+              needRepeat_(needRepeat) ,
               wh_(0) {
         }
 

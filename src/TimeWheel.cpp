@@ -47,7 +47,6 @@ void TimeWheel::addTimer(TimeWheel::Timer& timer) {
  */
 
 int TimeWheel::tick() {
-  //FIXME: not consider the repeated-timer.
   currentIndex_++;
   currentIndex_ %= wheelSize_;
 
@@ -72,7 +71,12 @@ int TimeWheel::tick() {
   }
 
   for (size_t i = 0; i< waits.size(); i++) {
+    if(!(waits[i]->isRegistered()))
+      continue;
     waits[i]->stop();
+    if (waits[i]->needRepeat()) {
+      addTimer(*waits[i]);
+    }
   }
 
   return 0;

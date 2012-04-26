@@ -9,6 +9,7 @@ class TimeWheelTestCases {
   void testAddandDelete2();
   void testTicks();
   void testAddRemoveInBaseJob();
+  void testRepeatTimer();
 };
 
 #endif

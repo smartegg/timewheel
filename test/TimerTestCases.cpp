@@ -7,10 +7,8 @@ using namespace ndsl;
 
 class Job : public TimeWheel::Timer {
  public:
-  Job(int s, bool n = false) : Timer(s,false){}
+  Job(int s, bool n = false) : Timer(s,n){}
   void callback(){}
- private :
-  
 };
 
 void TimerTestCases::testTimeSpan() {
@@ -24,5 +22,5 @@ void TimerTestCases::testInitialState() {
   BOOST_CHECK(timer.isRegistered() == false);
   BOOST_CHECK(timer.needRepeat() == false);
   Job timer2(100, true);
-  BOOST_CHECK(timer.needRepeat() == true);
+  BOOST_CHECK(timer2.needRepeat() == true);
 }

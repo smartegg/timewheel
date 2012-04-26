@@ -31,7 +31,20 @@ class StopTimer : public Timer {
     this->getAdvanceTimeWheel()->addTimer(*timer3);
 
     //stop this repeated timer
-    this->reset();
+    this->stop();
+  }
+};
+
+class RepeatTimer : public Timer {
+ public: 
+  RepeatTimer(int s, bool f = false) : Timer(s, f) {}
+  void callback() {
+    Timer*  timer1 = new Job(100);
+    Timer*  timer3 = new Job(600);
+    Timer*  timer2 = new Job(4000);
+    this->getAdvanceTimeWheel()->addTimer(*timer1);
+    this->getAdvanceTimeWheel()->addTimer(*timer2);
+    this->getAdvanceTimeWheel()->addTimer(*timer3);
   }
 };
 
@@ -165,7 +178,46 @@ void AdvanceTimeWheelTestCases::testAddRemoveInBaseJob() {
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired 
   wheel->run(100);//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
-}
-//FIXME   add a testcase to check if repeat-timer is legal.
 
+  delete wheel;
+}
+
+void AdvanceTimeWheelTestCases::testRepeatTimer() {
+  AdvanceTimeWheel* wheel = new AdvanceTimeWheel();
+  Timer* timer(new RepeatTimer(5000, true));
+  wheel->addTimer(*timer);
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  
+  for(int t = 1; t<=4999; t++) {
+    wheel->run(1);
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  }
+  wheel->run(1);//5000
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+  for(int t = 5001; t< 5100; t++) {
+    wheel->run(1);
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+  }
+  wheel->run(1);//5100
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); 
+  for(int t = 5101; t < 5600; t++) {
+    wheel->run(1);
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); 
+  }
+  wheel->run(1);//5600
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  for(int t = 5601; t < 9000; t++) {
+    wheel->run(1);
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
+  }
+  wheel->run(1);//9000
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  for(int t = 9001; t < 10000; t++) {
+    wheel->run(1);
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  }
+  wheel->run(1);//10000
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+  delete wheel;
+}
 
