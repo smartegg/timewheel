@@ -1,68 +1,102 @@
 #ifndef _NDSL_ADVANCE_TIME_WHEEL_HPP_
 #define _NDSL_ADVANCE_TIME_WHEEL_HPP_
 
-#include "BasicTimeWheel.hpp"
+#include <boost/intrusive/list.hpp>
 
 namespace ndsl {
 
 class InnerTimeWheel;
-class Timer0;
-class Timer1;
-class Timer2;
-class Timer3;
-
 
 class AdvanceTimeWheel {
   public:
-    class Timer : public BasicTimeWheel::Timer {
-     public:
-        explicit Timer(int timespan = 100, bool needRepeat = false)
-          : BasicTimeWheel::Timer(timespan, needRepeat) {
-          for (int i = 0; i < 5; i++) {
-            left[i] = 0;
-          }
-        }
-        virtual ~Timer() {}
-
-        virtual AdvanceTimeWheel* getAdvanceTimeWheel() {
-          return wh_;
-        }
-      protected:
-        virtual void setAdvanceTimeWheel(AdvanceTimeWheel* wheel) { wh_ = wheel;}
+    class Timer {
+      public:
+        explicit Timer(int timespan, bool needRepeat = false);
+        virtual ~Timer();
+        boost::intrusive::list_member_hook
+        <
+        boost::intrusive::link_mode<boost::intrusive::auto_unlink>
+        > timeHook_;
+        virtual void callback() = 0;
+        int getTimeSpan() const;
+        void setTimeSpan(int timespan);
+        bool isRegistered() const;
+        bool needRepeat() const;
+        virtual void stop();
+        AdvanceTimeWheel* getAdvanceTimeWheel() const;
       private:
-        int left[5];
-        int preId;
+        InnerTimeWheel* getTimeWheel()const;
+        void setAdvanceTimeWheel(AdvanceTimeWheel* wheel);
+        void setTimeWheel(InnerTimeWheel* wheel);
+
+        int idx_[5];
+        int idxlen_;
+        int left_[5];
+
+        int timespan_;
+        int rc_;
+        bool needRepeat_;
         AdvanceTimeWheel* wh_;
+        InnerTimeWheel* inner_;
 
         friend class AdvanceTimeWheel;
-        //useless these setter/getter from parents.
-//        void setTimeWheel(BasicTimeWheel*);
-//        BasicTimeWheel* getTimeWheel();
+        friend class InnerTimeWheel;
+        Timer(const Timer&);
+        Timer& operator=(const Timer&);
     };
-
+  public:
     AdvanceTimeWheel();
     virtual ~AdvanceTimeWheel();
 
     void run(int milliseconds);
 
     void addTimer(AdvanceTimeWheel::Timer& timer);
-
     size_t totalTimers() const;
-
-  private :
+  private:
     void tick();
-    void move_timers(int wheelId) ;
+    void move_timers(int wheelId);
     InnerTimeWheel* wheels_[5];
-    AdvanceTimeWheel::Timer* timers_[4];
-    
-
+    Timer* timers_[4];
     friend class Timer0;
     friend class Timer1;
     friend class Timer2;
     friend class Timer3;
-
-    AdvanceTimeWheel(const AdvanceTimeWheel&);
-    const AdvanceTimeWheel& operator= (const AdvanceTimeWheel&);
 };
+
+inline int AdvanceTimeWheel::Timer::getTimeSpan()const {
+  return timespan_;
+}
+
+inline void AdvanceTimeWheel::Timer::setTimeSpan(int timespan) {
+  timespan_ = timespan;
+}
+
+inline bool AdvanceTimeWheel::Timer::isRegistered() const {
+  return timeHook_.is_linked();
+}
+
+inline bool AdvanceTimeWheel::Timer::needRepeat() const {
+  return needRepeat_;
+}
+
+inline InnerTimeWheel* AdvanceTimeWheel::Timer::getTimeWheel() const {
+  return inner_;
+}
+
+inline AdvanceTimeWheel* AdvanceTimeWheel::Timer::getAdvanceTimeWheel() const {
+  return wh_;
+}
+
+inline void AdvanceTimeWheel::Timer::setAdvanceTimeWheel(
+  AdvanceTimeWheel* wh) {
+  wh_  = wh;
+}
+
+inline void AdvanceTimeWheel::Timer::setTimeWheel(
+  InnerTimeWheel* inner) {
+  inner_ = inner;
+}
+
+
 } //namespace ndsl
 #endif //_NDSL_ADVANCE_TIME_WHEEL_HPP_
