@@ -327,7 +327,7 @@ AdvanceTimeWheel::~AdvanceTimeWheel() {
 
 
 size_t AdvanceTimeWheel::totalTimers() const {
-
+  //TODO:  rewrite this method's algorithm  to make it become a o(1) algorithm.
   size_t sum = 0;
 
   for (int i = 0; i < 5; i++) {
