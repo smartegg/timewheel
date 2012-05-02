@@ -1,3 +1,11 @@
+/**
+ * @file TimeDriverByTimeFd.cpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 17:37:55
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #include "TimeDriverByTimeFd.hpp"
 
 #include "TimeHelper.hpp"
@@ -17,8 +25,8 @@
 namespace ndsl {
 
 
-TimeDriverByTimeFd::TimeDriverByTimeFd(long granularity) 
-    : TimeDriver(granularity), 
+TimeDriverByTimeFd::TimeDriverByTimeFd(long granularity)
+    : TimeDriver(granularity),
       timerfd_(-1){
 }
 
@@ -34,10 +42,10 @@ int TimeDriverByTimeFd::start() {
   struct itimerspec new_time;
   new_time.it_value.tv_nsec = (granularity_%1000) * 1000000;//milli to nano
   new_time.it_value.tv_sec  = granularity_  / 1000;
-  new_time.it_interval.tv_nsec = (granularity_%1000) * 1000000;//milli to nano 
+  new_time.it_interval.tv_nsec = (granularity_%1000) * 1000000;//milli to nano
   new_time.it_interval.tv_sec = (granularity_ / 1000);
 
-  if (timerfd_settime(timerfd_, 0, &new_time, NULL)  == -1) 
+  if (timerfd_settime(timerfd_, 0, &new_time, NULL)  == -1)
     handle_error(true);
 
   uint64_t s;
@@ -56,9 +64,9 @@ int TimeDriverByTimeFd::start() {
                 (unsigned long long) totalexpired);
 #endif
     for (uint64_t i = 0; i < expired; i++)
-       tick();      
+       tick();
   }
-  
+
   return 0;
 }
 

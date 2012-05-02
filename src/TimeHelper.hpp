@@ -1,3 +1,11 @@
+/**
+ * @file TimeHelper.hpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 17:05:54
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #ifndef NDSL_TIME_HELPER_H
 #define NDSL_TIME_HELPER_H
 
@@ -19,7 +27,7 @@ extern void start_count_time(void);
 
 
 #define handle_error(issyserr) \
-       do {NDSL::handleError(__FILE__, __FUNCTION__, __LINE__, issyserr);  } while (0)
+       do {ndsl::handleError(__FILE__, __FUNCTION__, __LINE__, issyserr);  } while (0)
 #define dbg(a,b) \
     std::cout <<#a <<'\t' << a << '\t' << #b << '\t' << b << std::endl
 

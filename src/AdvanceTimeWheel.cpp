@@ -91,7 +91,8 @@ using namespace boost::intrusive;
 
 
 AdvanceTimeWheel::Timer::Timer(int timespan, bool needRepeat)
-  : idxlen_(0) ,
+  : TimerInterface(timespan, needRepeat),
+    idxlen_(0) ,
     timespan_(timespan),
     needRepeat_(needRepeat) ,
     wh_(0),
@@ -219,7 +220,6 @@ std::vector<AdvanceTimeWheel::Timer*>& InnerTimeWheel::tick() {
     } else {
       //never reach this.
       assert(0);
-      printf("test: %d %d\n", it->getTimeSpan(), it->rc_);
       it->rc_--;
     }
   }

@@ -1,2 +1,2 @@
-SUBDIRS = src test
-EXTRA_DIST = include
+SUBDIRS = src test samples
+EXTRA_DIST = include 

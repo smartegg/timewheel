@@ -9,10 +9,10 @@ namespace ndsl {
 
 using namespace boost;
 
-TimeWheel::TimeWheel(int frequence, int wheelSize)
+TimeWheel::TimeWheel(int granularity, int wheelSize)
   : currentIndex_(0),
     wheelSize_(wheelSize) ,
-    frequence_(frequence) {
+    frequence_(granularity) {
   wheel_ = new Spoke[wheelSize];
 }
 

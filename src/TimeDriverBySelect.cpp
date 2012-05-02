@@ -1,3 +1,11 @@
+/**
+ * @file TimeDriverBySelect.cpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 17:03:46
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #include "TimeDriverBySelect.hpp"
 
 #include "TimeHelper.hpp"

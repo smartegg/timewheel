@@ -36,5 +36,6 @@ AC_CHECK_FUNCS([clock_gettime memset select])
 
 AC_CONFIG_FILES([Makefile
                 src/Makefile
-                test/Makefile ])
+                test/Makefile 
+                samples/Makefile])
 AC_OUTPUT

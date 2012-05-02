@@ -13,7 +13,7 @@ TimeDriver::~TimeDriver() {
 
 }
 
-void TimeDriver::mountTimeWheel(std::tr1::shared_ptr<TimeWheel> timewheel) {
+void TimeDriver::mountTimeWheel(TimeDriver::TimeWheelPtr timewheel) {
   wheels_.push_back(timewheel);
 }
 
@@ -31,7 +31,7 @@ int TimeDriver::tick() {
 #ifdef TIME_DRIVER_STATUS
       puts("timedriver tick");
 #endif
-      wheels_[i]->perTickBookKeeping();
+      wheels_[i]->run(granularity_);
     }
   }
 

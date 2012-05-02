@@ -1,10 +1,18 @@
+/**
+ * @file TimeDriver.hpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 16:55:16
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #ifndef _TIME_DRIVER_HPP_
 #define _TIME_DRIVER_HPP_
 
 
 #include <vector>
-#include "TimeWheel.hpp"
-#include "Timer.hpp"
+#include <tr1/memory>
+#include "TimeWheelInterface.hpp"
 
 namespace ndsl {
 
@@ -16,9 +24,9 @@ namespace ndsl {
 class TimeDriver {
   public:
     enum {
-      DEFAULT_GRANULARITY =  100
+      DEFAULT_GRANULARITY =  1
     };
-    typedef std::tr1::shared_ptr<TimeWheel> TimeWheelPtr;
+    typedef std::tr1::shared_ptr<TimeWheelInterface> TimeWheelPtr;
 
     explicit TimeDriver(long granularity = DEFAULT_GRANULARITY) ;
 
@@ -26,7 +34,7 @@ class TimeDriver {
 
     //The timewheel here mounted  please be multiple of this driver's granularity.
     //or will not be accurated.
-    void mountTimeWheel(std::tr1::shared_ptr<TimeWheel> timewheel) ;
+    void mountTimeWheel(TimeWheelPtr timewheel) ;
     virtual int start() = 0;
 
     int totalWheels() const;

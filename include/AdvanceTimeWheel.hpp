@@ -1,15 +1,25 @@
+/**
+ * @file AdvanceTimeWheel.hpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 15:00:30
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #ifndef _NDSL_ADVANCE_TIME_WHEEL_HPP_
 #define _NDSL_ADVANCE_TIME_WHEEL_HPP_
 
 #include <boost/intrusive/list.hpp>
+#include "TimerInterface.hpp"
+#include "TimeWheelInterface.hpp"
 
 namespace ndsl {
 
 class InnerTimeWheel;
 
-class AdvanceTimeWheel {
+class AdvanceTimeWheel : public TimeWheelInterface{
   public:
-    class Timer {
+    class Timer : public TimerInterface{
       public:
         explicit Timer(int timespan, bool needRepeat = false);
         virtual ~Timer();
@@ -33,7 +43,7 @@ class AdvanceTimeWheel {
         //reinert into the TimeWheel
         virtual void reset();
       private:
-        
+
         InnerTimeWheel* getTimeWheel()const;
         void setAdvanceTimeWheel(AdvanceTimeWheel* wheel);
         void setTimeWheel(InnerTimeWheel* wheel);
@@ -59,6 +69,8 @@ class AdvanceTimeWheel {
   public:
     AdvanceTimeWheel();
     virtual ~AdvanceTimeWheel();
+
+    virtual int getGranularity() const;
 
     void run(int milliseconds);
 
@@ -116,6 +128,10 @@ inline void AdvanceTimeWheel::Timer::setAdvanceTimeWheel(
 inline void AdvanceTimeWheel::Timer::setTimeWheel(
   InnerTimeWheel* inner) {
   inner_ = inner;
+}
+
+inline int AdvanceTimeWheel::getGranularity() const{
+  return 1;
 }
 
 

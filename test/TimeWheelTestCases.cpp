@@ -14,16 +14,16 @@ namespace {
 class Job : public TimeWheel::Timer {
  public :
   Job(int s, bool f=false) : Timer(s, f){}
-  void callback() { 
+  void callback() {
   }
 };
 
 class StopTimer : public TimeWheel::Timer {
  public :
   StopTimer(int s, bool f=false) : Timer(s, f){}
-  void callback() { 
+  void callback() {
     using namespace std;
-    
+
     //creat  100ms, 500ms,600ms one-shot timers
     Timer*  timer1 = new Job(100);
     Timer*  timer2 = new Job(500);
@@ -38,7 +38,7 @@ class StopTimer : public TimeWheel::Timer {
 };
 
 class RepeatTimer : public TimeWheel::Timer {
- public: 
+ public:
   RepeatTimer(int s, bool f = false) : Timer(s, f) {}
   void callback() {
     Timer*  timer1 = new Job(100);
@@ -54,13 +54,13 @@ class RepeatTimer : public TimeWheel::Timer {
 
 
 void TimeWheelTestCases::testDefaultCtor() {
-  TimeWheel wheel;    
-  BOOST_CHECK(wheel.getFrequence() == 100);
+  TimeWheel wheel;
+  BOOST_CHECK(wheel.getGranularity() == 100);
 }
 
 void TimeWheelTestCases::testCtors() {
   TimeWheel wheel(200);
-  BOOST_CHECK(wheel.getFrequence() == 200);
+  BOOST_CHECK(wheel.getGranularity()== 200);
 }
 
 void TimeWheelTestCases::testAddandDelete() {
@@ -78,7 +78,7 @@ void TimeWheelTestCases::testAddandDelete2() {
   vector<TimeWheel::Timer* > jobs;
 
   for(size_t i = 1; i<= 10000; i++) {
-    jobs.push_back(new Job(100)); 
+    jobs.push_back(new Job(100));
     wheel.addTimer(*jobs[i-1]);
     BOOST_CHECK(wheel.totalTimers() == i);
   }
@@ -145,34 +145,34 @@ void TimeWheelTestCases::testTicks() {
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 
   wheel->run(100);//1000
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 }
 
 void TimeWheelTestCases::testAddRemoveInBaseJob() {
   TimeWheel* wheel = new TimeWheel(100,5);
-  
-  Timer* job(new StopTimer(100, true));          
+
+  Timer* job(new StopTimer(100, true));
   //creat a one-shot timer
 
   wheel->addTimer(*job);
 
   //simulate
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
   wheel->run(100);//100
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); //expired one , create two
-  
+
   wheel->run(100);//200
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); //expired one
   wheel->run(100);//300
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
   wheel->run(100);//400
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
   wheel->run(100);//500
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
   wheel->run(100);//600
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); //expired
   wheel->run(100);//700
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //expired
   wheel->run(100);//800
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0); //no timers
 }
@@ -182,38 +182,38 @@ void TimeWheelTestCases::testRepeatTimer() {
   TimeWheel* wheel = new TimeWheel(1, 10000);
   Timer* timer(new RepeatTimer(5000, true));
   wheel->addTimer(*timer);
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
-  
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
+
   for(int t = 1; t<=4999; t++) {
     wheel->run(1);
-    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
   }
   wheel->run(1);//5000
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4);
   for(int t = 5001; t< 5100; t++) {
     wheel->run(1);
-    BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 4);
   }
   wheel->run(1);//5100
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
   for(int t = 5101; t < 5600; t++) {
     wheel->run(1);
-    BOOST_CHECK_EQUAL(wheel->totalTimers(), 3); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 3);
   }
   wheel->run(1);//5600
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
   for(int t = 5601; t < 9000; t++) {
     wheel->run(1);
     BOOST_CHECK_EQUAL(wheel->totalTimers(), 2);
   }
   wheel->run(1);//9000
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
   for(int t = 9001; t < 10000; t++) {
     wheel->run(1);
-    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1); 
+    BOOST_CHECK_EQUAL(wheel->totalTimers(), 1);
   }
   wheel->run(1);//10000
-  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4); 
+  BOOST_CHECK_EQUAL(wheel->totalTimers(), 4);
   delete wheel;
 }
 

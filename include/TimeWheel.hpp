@@ -1,15 +1,27 @@
+/**
+ * @file TimeWheel.hpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 15:15:18
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #ifndef _NDSL_TIME_WHEEL_HPP_
 #define _NDSL_TIME_WHEEL_HPP_
 
 #include <boost/intrusive/list.hpp>
+#include "TimerInterface.hpp"
+#include "TimeWheelInterface.hpp"
 
 namespace ndsl {
-class TimeWheel {
+
+class TimeWheel : public TimeWheelInterface{
   public:
-    class Timer {
+    class Timer : public TimerInterface{
       public:
-        explicit Timer(int timespan, bool needRepeat = false) 
-            : timespan_(timespan),
+        explicit Timer(int timespan, bool needRepeat = false)
+            : TimerInterface(timespan, needRepeat),
+              timespan_(timespan),
               needRepeat_(needRepeat) ,
               wh_(0) {
         }
@@ -18,7 +30,7 @@ class TimeWheel {
 
         boost::intrusive::list_member_hook
         <
-            boost::intrusive::link_mode<boost::intrusive::auto_unlink> 
+            boost::intrusive::link_mode<boost::intrusive::auto_unlink>
         > timeHook_;
 
         //MUST NOT free the timer's memory when callback()!
@@ -26,6 +38,9 @@ class TimeWheel {
 
         int getTimeSpan()const {
           return timespan_;
+        }
+        void setTimeSpan(int timespan) {
+          timespan_ = timespan;
         }
 
         bool isRegistered() const {
@@ -61,20 +76,20 @@ class TimeWheel {
   private:
     typedef boost::intrusive::list
         <
-          Timer, 
+          Timer,
           boost::intrusive::member_hook
           <
             Timer,
             boost::intrusive::list_member_hook
             <
-                boost::intrusive::link_mode<boost::intrusive::auto_unlink> 
+                boost::intrusive::link_mode<boost::intrusive::auto_unlink>
             >,
             &Timer::timeHook_
           >,
-          boost::intrusive::constant_time_size<false> 
+          boost::intrusive::constant_time_size<false>
       > Spoke;
   public:
-    explicit TimeWheel(int frequence = 100, int wheelSize_ = 1024);
+    explicit TimeWheel(int Granularity = 100, int wheelSize_ = 1024);
     virtual ~TimeWheel();
 
     void run(int milliseconds);
@@ -84,8 +99,8 @@ class TimeWheel {
 
     size_t totalTimers() const;
     size_t wheelSize() const;
-    size_t getFrequence() const;
-  
+    int getGranularity() const;
+
   private:
     int tick();
 
@@ -99,7 +114,7 @@ inline size_t TimeWheel::wheelSize() const {
   return wheelSize_;
 }
 
-inline size_t TimeWheel::getFrequence() const {
+inline int TimeWheel::getGranularity() const {
   return frequence_;
 }
 

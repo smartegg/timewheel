@@ -1,3 +1,11 @@
+/**
+ * @file TimeHelper.cpp
+ * @brief
+ * @author biyu<lazysmartegg@gmail.com>
+ * @version 1.0
+ * @date Wed, 02 May 2012 17:05:47
+ * @copyright Copyright (C) 2012 smartegg<lazysmartegg@gmail.com>
+ */
 #include "TimeHelper.hpp"
 
 
@@ -13,7 +21,7 @@ void handleError(const char* filename,
                         const char* funcname,
                         const int line,
                         bool issyserr) {
-  std::stringstream stream; 
+  std::stringstream stream;
   std::string result;
   stream << line -1;//function failed is the line before it.
   stream >> result;
@@ -31,7 +39,7 @@ void handleError(const char* filename,
   else {
     std::cerr << info << std::endl;
   }
-  exit(-1);  
+  exit(-1);
 }
 
 void start_count_time(void) {

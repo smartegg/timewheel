@@ -25,7 +25,7 @@ class SingeletonTimeDriver : public TimeDriver {
 
 
   protected:
-    friend void NDSL::sigalrmhandler(int signum);
+    friend void ndsl::sigalrmhandler(int signum);
 
   private:
     explicit SingeletonTimeDriver(long granularity = TimeDriver::DEFAULT_GRANULARITY);
@@ -34,7 +34,6 @@ class SingeletonTimeDriver : public TimeDriver {
     struct itimerval timer_;
     struct sigaction sa_;
     static SingeletonTimeDriver* driver_;
-    std::vector<std::tr1::shared_ptr<TimeWheel> > array_;
 
     SingeletonTimeDriver(const SingeletonTimeDriver&);
     SingeletonTimeDriver& operator=(const SingeletonTimeDriver&);
