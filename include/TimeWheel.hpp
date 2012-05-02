@@ -39,6 +39,15 @@ class TimeWheel : public TimeWheelInterface{
         int getTimeSpan()const {
           return timespan_;
         }
+
+        /* --------------------------------------------------------------------------*/
+        /**
+         * @brief setTimeSpan
+         * set the new timeout time
+         * MUST first stop(), then call this function. other action undefined.
+         * @Param timespan
+         */
+        /* ----------------------------------------------------------------------------*/
         void setTimeSpan(int timespan) {
           timespan_ = timespan;
         }

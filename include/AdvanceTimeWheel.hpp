@@ -28,6 +28,14 @@ class AdvanceTimeWheel : public TimeWheelInterface{
         boost::intrusive::link_mode<boost::intrusive::auto_unlink>
         > timeHook_;
         virtual void callback() = 0;
+        /* --------------------------------------------------------------------------*/
+        /**
+         * @brief setTimeSpan()
+         * set the new timeout time
+         * MUST first stop(), then call this function. other action undefined.
+         * @Param timespan
+         */
+        /* ----------------------------------------------------------------------------*/
         int getTimeSpan() const;
         void setTimeSpan(int timespan);
         bool isRegistered() const;
