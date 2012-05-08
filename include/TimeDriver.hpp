@@ -24,7 +24,7 @@ namespace ndsl {
 class TimeDriver {
   public:
     enum {
-      DEFAULT_GRANULARITY =  1
+      DEFAULT_GRANULARITY =  50
     };
     typedef std::tr1::shared_ptr<TimeWheelInterface> TimeWheelPtr;
 

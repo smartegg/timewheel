@@ -1,0 +1,3 @@
+1 add special check to 0ms Timer  
+   now  We can only create [1, 2^32]ms timers,
+        we can not create a  0ms timer.
