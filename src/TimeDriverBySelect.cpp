@@ -14,6 +14,7 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <unistd.h>
+#include "HandleError.hpp"
 
 
 
@@ -45,8 +46,7 @@ int TimeDriverBySelect::start() {
       if (r == -1 && errno == EINTR) {
         continue;
       }
-
-      handle_error(true);
+      NDSL_ASSERT(errno);
     }
 
     printf_elapsed_time();

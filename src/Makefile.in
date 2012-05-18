@@ -50,7 +50,8 @@ ___lib_libtimewheel_a_LIBADD =
 am____lib_libtimewheel_a_OBJECTS = TimeWheel.$(OBJEXT) \
 	AdvanceTimeWheel.$(OBJEXT) TimeHelper.$(OBJEXT) \
 	TimeDriverBySelect.$(OBJEXT) TimeDriver.$(OBJEXT) \
-	TimeDriverByTimeFd.$(OBJEXT) SingeletonTimeDriver.$(OBJEXT)
+	TimeDriverByTimeFd.$(OBJEXT) SingeletonTimeDriver.$(OBJEXT) \
+	HandleError.$(OBJEXT)
 ___lib_libtimewheel_a_OBJECTS = $(am____lib_libtimewheel_a_OBJECTS)
 am__dirstamp = $(am__leading_dot)dirstamp
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
@@ -161,7 +162,7 @@ top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir)/include
 noinst_LIBRARIES = ../lib/libtimewheel.a
 ___lib_libtimewheel_a_SOURCES = TimeWheel.cpp  AdvanceTimeWheel.cpp TimeHelper.cpp TimeDriverBySelect.cpp \
-								TimeDriver.cpp  TimeDriverByTimeFd.cpp   SingeletonTimeDriver.cpp 
+								TimeDriver.cpp  TimeDriverByTimeFd.cpp   SingeletonTimeDriver.cpp  HandleError.cpp
 
 all: all-am
 
@@ -215,6 +216,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AdvanceTimeWheel.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HandleError.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SingeletonTimeDriver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverBySelect.Po@am__quote@
