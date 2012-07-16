@@ -8,12 +8,11 @@
  */
 #include "TimeDriverByTimeFd.hpp"
 
-#include "TimeHelper.hpp"
 #include <sys/timerfd.h>
 #include <stdint.h>
 #include <string.h>
 #include "HandleError.hpp"
-
+#include "TimeHelper.hpp"
 
 #define DBG(new_time) \
   { \
@@ -64,7 +63,7 @@ int TimeDriverByTimeFd::start() {
   printf_elapsed_time();
 
   for (;;) {
-    //this is a block read, wait untial block.
+    //this is a block read, wait untial time expired.
     s = read(timerfd_, &expired, sizeof(uint64_t));
 
     if (s != sizeof(uint64_t)) {
