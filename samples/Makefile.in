@@ -32,7 +32,8 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-noinst_PROGRAMS = ../samples/select$(EXEEXT)
+noinst_PROGRAMS = ../samples/select$(EXEEXT) \
+	../samples/asiotimer$(EXEEXT) ../samples/timefd$(EXEEXT)
 subdir = samples
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -44,10 +45,20 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 PROGRAMS = $(noinst_PROGRAMS)
+am____samples_asiotimer_OBJECTS = TimeDriverByAsioTimer.$(OBJEXT)
+___samples_asiotimer_OBJECTS = $(am____samples_asiotimer_OBJECTS)
+___samples_asiotimer_DEPENDENCIES =  \
+	$(top_builddir)/lib/libtimewheel.a \
+	/usr/local/lib/libboost_system.a
+___samples_asiotimer_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(___samples_asiotimer_LDFLAGS) $(LDFLAGS) -o $@
+am__dirstamp = $(am__leading_dot)dirstamp
 am____samples_select_OBJECTS = TimeDriverBySelect_unit_test.$(OBJEXT)
 ___samples_select_OBJECTS = $(am____samples_select_OBJECTS)
 ___samples_select_DEPENDENCIES = $(top_builddir)/lib/libtimewheel.a
-am__dirstamp = $(am__leading_dot)dirstamp
+am____samples_timefd_OBJECTS = TimeDriverByTimeFd.$(OBJEXT)
+___samples_timefd_OBJECTS = $(am____samples_timefd_OBJECTS)
+___samples_timefd_DEPENDENCIES = $(top_builddir)/lib/libtimewheel.a
 DEFAULT_INCLUDES = -I.@am__isrc@ -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -57,8 +68,10 @@ CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 CXXLD = $(CXX)
 CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
-SOURCES = $(___samples_select_SOURCES)
-DIST_SOURCES = $(___samples_select_SOURCES)
+SOURCES = $(___samples_asiotimer_SOURCES) $(___samples_select_SOURCES) \
+	$(___samples_timefd_SOURCES)
+DIST_SOURCES = $(___samples_asiotimer_SOURCES) \
+	$(___samples_select_SOURCES) $(___samples_timefd_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -155,10 +168,15 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 INCLUDES = -I$(top_srcdir)/include
 ___samples_select_SOURCES = TimeDriverBySelect_unit_test.cpp
+___samples_asiotimer_SOURCES = TimeDriverByAsioTimer.cpp
+___samples_timefd_SOURCES = TimeDriverByTimeFd.cpp
 #___bin_test_CXXFLAGS = 
+___samples_asiotimer_LDFLAGS = -pthread
 EXTRA_DIST = 
 # NOTE: link against to local generated lib, MUST use LDADD
 ___samples_select_LDADD = $(top_builddir)/lib/libtimewheel.a
+___samples_asiotimer_LDADD = $(top_builddir)/lib/libtimewheel.a /usr/local/lib/libboost_system.a
+___samples_timefd_LDADD = $(top_builddir)/lib/libtimewheel.a
 all: all-am
 
 .SUFFIXES:
@@ -199,9 +217,15 @@ clean-noinstPROGRAMS:
 ../samples/$(am__dirstamp):
 	@$(MKDIR_P) ../samples
 	@: > ../samples/$(am__dirstamp)
+../samples/asiotimer$(EXEEXT): $(___samples_asiotimer_OBJECTS) $(___samples_asiotimer_DEPENDENCIES) $(EXTRA____samples_asiotimer_DEPENDENCIES) ../samples/$(am__dirstamp)
+	@rm -f ../samples/asiotimer$(EXEEXT)
+	$(___samples_asiotimer_LINK) $(___samples_asiotimer_OBJECTS) $(___samples_asiotimer_LDADD) $(LIBS)
 ../samples/select$(EXEEXT): $(___samples_select_OBJECTS) $(___samples_select_DEPENDENCIES) $(EXTRA____samples_select_DEPENDENCIES) ../samples/$(am__dirstamp)
 	@rm -f ../samples/select$(EXEEXT)
 	$(CXXLINK) $(___samples_select_OBJECTS) $(___samples_select_LDADD) $(LIBS)
+../samples/timefd$(EXEEXT): $(___samples_timefd_OBJECTS) $(___samples_timefd_DEPENDENCIES) $(EXTRA____samples_timefd_DEPENDENCIES) ../samples/$(am__dirstamp)
+	@rm -f ../samples/timefd$(EXEEXT)
+	$(CXXLINK) $(___samples_timefd_OBJECTS) $(___samples_timefd_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -209,7 +233,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverByAsioTimer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverBySelect_unit_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TimeDriverByTimeFd.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

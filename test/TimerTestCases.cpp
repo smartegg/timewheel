@@ -1,7 +1,5 @@
-#include "TimerTestCases.hpp"
-
+#include <boost/test/unit_test.hpp>
 #include "TimeWheel.hpp"
-#include <boost/test/test_tools.hpp>
 
 using namespace ndsl;
 
@@ -11,16 +9,21 @@ class Job : public TimeWheel::Timer {
   void callback(){}
 };
 
-void TimerTestCases::testTimeSpan() {
+BOOST_AUTO_TEST_SUITE(TimerTestCases)
+
+BOOST_AUTO_TEST_CASE(testTimeSpan)
+{
   TimeWheel::Timer* timerptr = new Job(100);
   TimeWheel::Timer& timer = *timerptr;
   BOOST_CHECK(timer.getTimeSpan() == 100);
 }
 
-void TimerTestCases::testInitialState() {
+BOOST_AUTO_TEST_CASE(testInitialState) {
   Job timer(100);
   BOOST_CHECK(timer.isRegistered() == false);
   BOOST_CHECK(timer.needRepeat() == false);
   Job timer2(100, true);
   BOOST_CHECK(timer2.needRepeat() == true);
 }
+
+BOOST_AUTO_TEST_SUITE_END()

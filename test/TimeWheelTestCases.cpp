@@ -1,6 +1,7 @@
-#include "TimeWheelTestCases.hpp"
 
-#include <boost/test/test_tools.hpp>
+#define BOOST_TEST_NO_MAIN
+
+#include <boost/test/unit_test.hpp>
 #include <tr1/memory>
 #include <vector>
 #include "TimeWheel.hpp"
@@ -53,17 +54,19 @@ class RepeatTimer : public TimeWheel::Timer {
 }
 
 
-void TimeWheelTestCases::testDefaultCtor() {
+BOOST_AUTO_TEST_SUITE(TimeWheelTestCases)
+
+BOOST_AUTO_TEST_CASE(testDefaultCtor) {
   TimeWheel wheel;
   BOOST_CHECK(wheel.getGranularity() == 100);
 }
 
-void TimeWheelTestCases::testCtors() {
+BOOST_AUTO_TEST_CASE(testCtors) {
   TimeWheel wheel(200);
   BOOST_CHECK(wheel.getGranularity()== 200);
 }
 
-void TimeWheelTestCases::testAddandDelete() {
+BOOST_AUTO_TEST_CASE(testAddandDelete) {
   TimeWheel  wheel;
   TimeWheel::Timer* job(new Job(100));
   wheel.addTimer(*job);
@@ -73,7 +76,7 @@ void TimeWheelTestCases::testAddandDelete() {
 }
 
 
-void TimeWheelTestCases::testAddandDelete2() {
+BOOST_AUTO_TEST_CASE(testAddandDelete2) {
   TimeWheel wheel;
   vector<TimeWheel::Timer* > jobs;
 
@@ -88,7 +91,7 @@ void TimeWheelTestCases::testAddandDelete2() {
   }
 }
 
-void TimeWheelTestCases::testTicks() {
+BOOST_AUTO_TEST_CASE(testTicks) {
   TimeWheel* wheel = new TimeWheel(100,5);
   //creat a one-shot timer
   Timer* timer1(new Job(100,false));
@@ -148,7 +151,7 @@ void TimeWheelTestCases::testTicks() {
   BOOST_CHECK_EQUAL(wheel->totalTimers(), 0);
 }
 
-void TimeWheelTestCases::testAddRemoveInBaseJob() {
+BOOST_AUTO_TEST_CASE(testAddRemoveInBaseJob) {
   TimeWheel* wheel = new TimeWheel(100,5);
 
   Timer* job(new StopTimer(100, true));
@@ -178,7 +181,7 @@ void TimeWheelTestCases::testAddRemoveInBaseJob() {
 }
 
 
-void TimeWheelTestCases::testRepeatTimer() {
+BOOST_AUTO_TEST_CASE(testRepeatTimer) {
   TimeWheel* wheel = new TimeWheel(1, 10000);
   Timer* timer(new RepeatTimer(5000, true));
   wheel->addTimer(*timer);
@@ -218,3 +221,4 @@ void TimeWheelTestCases::testRepeatTimer() {
 }
 
 
+BOOST_AUTO_TEST_SUITE_END()
